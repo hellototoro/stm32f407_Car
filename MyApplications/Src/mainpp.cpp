@@ -8,13 +8,15 @@
 #include "PID/PID_v1.h"
 #include "tools/pid_tool/protocol.h"
 #include "s6d04d1/s6d04d1.hpp"
+#include "r61509/r61509.hpp"
 #include "display/display.hpp"
 
 MyDrivers::led led1(1);
-oled display;
 
-s6d04d1 s6d0;
-MyDrivers::display tft_display(&s6d0);
+//oled display;
+//s6d04d1 s6d0;
+r61509 r61509;
+MyDrivers::display tft_display(&r61509);
 
 Encoder_HandleTypeDef *encoders[] = {LEFT_encoder, RIGHT_encoder};
 uint8_t display_buffer[20];
@@ -31,8 +33,11 @@ double Kp_r=0.8, Ki_r=3.0, Kd_r=0.00000;//150 ~ 200 rpm
 PID Motor_PID_l(&Input_l, &Output_l, &Setpoint_l, Kp_l, Ki_l, Kd_l, DIRECT);
 PID Motor_PID_r(&Input_r, &Output_r, &Setpoint_r, Kp_r, Ki_r, Kd_r, DIRECT);
 
-extern "C" {
+
+/* 函数声明 */
+void led_task(void);
 void motor_pid_control(void);
+
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
@@ -47,9 +52,8 @@ void setup(void)
 	//delay_start();
 	tft_display.init();
 	tft_display.clear(MyDrivers::lcd_color::WHITE);
-	display.init();
-	display.Clear_Screen();
-	display.Display_Frame();
+	tft_display.showString(10, 10, (char*)"test");
+
     startEncoder(encoders, 2);
 
     Motor_init();
@@ -75,19 +79,18 @@ void setup(void)
 
 void loop(void)
 {
-    led1.toggle();
     Input_l = getSpeed_RPM(wheel_left);
-    //sprintf((char*)display_buffer, "%.02f", Input_l);
-    //Gui_DrawFont_GBK16(65, 10, BLACK, WHITE, display_buffer);
+    sprintf((char*)display_buffer, "%.02f", Input_l);
+    tft_display.showString(65, 10, (char*)display_buffer);
 
     Input_r = getSpeed_RPM(wheel_right);
-    //sprintf((char*)display_buffer, "%.02f", Input_r);
-    //Gui_DrawFont_GBK16(65, 30, BLACK, WHITE, display_buffer);
+    sprintf((char*)display_buffer, "%.02f", Input_r);
+    tft_display.showString(65, 30, (char*)display_buffer);
 
     if (Motor_PID_l.Compute() == true) {
         Motor_PID_Input(wheel_left, Output_l);
-        //sprintf((char*)display_buffer, "%.02f", Output_l);
-        //Gui_DrawFont_GBK16(75, 70, BLACK, WHITE, display_buffer);
+        sprintf((char*)display_buffer, "%.02f", Output_l);
+        tft_display.showString(75, 70, (char*)display_buffer);
         //debug
         //int32_t temp = (int32_t)Input_l;
         set_computer_value(SEND_FACT_CMD, CURVES_CH1, (void *)&Input_l, 1);
@@ -95,8 +98,8 @@ void loop(void)
 
     if (Motor_PID_r.Compute() == true) {
         Motor_PID_Input(wheel_right, Output_r);
-        //sprintf((char*)display_buffer, "%.02f", Output_r);
-        //Gui_DrawFont_GBK16(75, 50, BLACK, WHITE, display_buffer);
+        sprintf((char*)display_buffer, "%.02f", Output_r);
+        tft_display.showString(75, 50, (char*)display_buffer);
         //debug
         //int32_t temp = (int32_t)Input_r;
         set_computer_value(SEND_FACT_CMD, CURVES_CH2, (void *)&Input_r, 1);
@@ -104,6 +107,7 @@ void loop(void)
     /* 接收数据处理 */
     //debug
     analysis_rec_data();
+    led_task();
 }
 
 void set_target_speed(Motor_WheelType wheel, double speed)
@@ -111,4 +115,12 @@ void set_target_speed(Motor_WheelType wheel, double speed)
     (wheel == wheel_left) ? Setpoint_l = speed : Setpoint_r = speed;
 }
 
+void led_task(void)
+{
+    static uint32_t tick = 0;
+    uint32_t now = HAL_GetTick();
+    if( (now - tick) >= 1000) {
+        led1.toggle();
+    	tick = now;
+    }
 }

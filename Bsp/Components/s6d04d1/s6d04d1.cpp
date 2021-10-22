@@ -72,11 +72,15 @@ uint32_t s6d04d1::getRamAddress(void)
   * @param  None
   * @retval The s6d04d1 ID 
   */
-uint16_t s6d04d1::readID(void)
+void s6d04d1::readID(void)
 {
     LCD_IO_WriteReg(RDID2);
     LCD_IO_ReadRamData();//Dummy read 
     id = LCD_IO_ReadRamData();
+}
+
+uint16_t s6d04d1::getID(void)
+{
     return id;
 }
 
@@ -398,7 +402,7 @@ void s6d04d1::drawLine(uint16_t RGBCode, uint16_t startXpos, uint16_t startYpos,
             uCol += incy; 
         } 
     }  
-}    
+}
 
 /**
   * @brief  Displays a bitmap picture.

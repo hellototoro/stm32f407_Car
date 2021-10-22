@@ -35,7 +35,7 @@ public:
 
     }
 
-    virtual uint16_t readID(void) = 0;
+    virtual uint16_t getID(void) = 0;
     virtual void init(void) = 0;
     virtual void prepareWrite(void) = 0;
     virtual void setCursor(uint16_t Xpos,uint16_t Ypos) = 0;

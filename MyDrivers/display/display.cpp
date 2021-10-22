@@ -6,6 +6,7 @@
  */
 
 #include "display/display.hpp"
+#include "display/inc/tft_lcd_font.h"
 
 namespace MyDrivers {
 
@@ -14,12 +15,19 @@ display::display(tft_lcd* panelType) {
     DrawProp.BackColor = lcd_color::WHITE;
     DrawProp.pFont     = &Font24;
     DrawProp.TextColor = lcd_color::BLACK;
+    charSize = 12;
+    charMode = 0;
     tft_panel = panelType;
 }
 
 void display::init(void)
 {
     tft_panel->init();
+}
+
+void display::setCharSize(uint8_t size)
+{
+    charSize = size;
 }
 
 /**
@@ -50,8 +58,73 @@ uint32_t display::getDisplayAddress()
     return tft_panel->getRamAddress();
 }
 
+void display::showChar(uint16_t x,uint16_t y,char ch)
+{
+	char temp, t1;
+    uint16_t y0=y;
+    uint8_t csize = ( charSize/8 + ( (charSize%8) ? 1 : 0) ) * (charSize/2);
+    uint8_t index = ch - ' ';
+    for(uint8_t t = 0; t < csize; t++)
+    {   
+        if(charSize == 12)      temp = ascii_1206[index][t];
+        else if(charSize == 16) temp = ascii_1608[index][t];
+        else if(charSize == 24) temp = ascii_2412[index][t];
+        else return;
+        for( t1 = 0; t1 < 8; t1++ )
+        {
+            if( temp & 0x80 ) {
+                //LCD_DrawPoint(x,y,lcd_dev.color.front);
+                tft_panel->writePixel(x, y, static_cast<uint16_t>(DrawProp.TextColor));
+            } else if( charMode == 0 ) {
+                //LCD_DrawPoint(x,y,lcd_dev.color.back);
+                tft_panel->writePixel(x, y, static_cast<uint16_t>(DrawProp.BackColor));
+            }
+            temp <<= 1;
+            y++;
+            if( y >= tft_panel->getPixelHeight() )
+                return;
+            if( (y - y0) == charSize )
+            {
+                y = y0;
+                x++;
+                if( x >= tft_panel->getPixelWidth() )
+                    return;
+                break;
+            }
+        }
+    }
+}
+
+void display::showString(uint16_t x,uint16_t y,char* str)
+{
+    uint8_t x0 = x;
+    uint16_t width = tft_panel->getPixelWidth() + x;
+    uint16_t height = tft_panel->getPixelHeight() + y;
+    while( ( *str <= '~' ) && ( *str >= ' ' ) )
+    {       
+        if( x >= width ) {
+            x = x0;
+            y += charSize;
+        }
+        if( y >= height )
+            break;
+        showChar(x, y, *str);
+        x += charSize/2;
+        str++;
+    }  
+}
+
+//m^n
+uint32_t display::power(uint8_t m,uint8_t n)
+{
+    uint32_t result = 1;
+    while(n--) result *= m;
+    return result;
+}
+
+
 display::~display() {
-	// TODO Auto-generated destructor stub
+    // TODO Auto-generated destructor stub
 }
 
 } /* namespace MyDrivers */

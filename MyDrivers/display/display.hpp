@@ -61,6 +61,7 @@ public:
     void init(void);
     //void setPanel(tft_lcd* panel);
     //tft_lcd* getPanel();
+    void setCharSize(uint8_t size);
     void showChar(uint16_t x,uint16_t y,char ch);
     void showString(uint16_t x,uint16_t y,char* str);
     void showPicture(uint16_t x,uint16_t y,char* pic);
@@ -70,6 +71,7 @@ public:
     void displayStringAtLine(uint16_t Line, uint8_t *ptr);
     void displayStringAt(uint16_t Xpos, uint16_t Ypos, uint8_t *Text, Line_ModeTypdef Mode);
     void displayChar(uint16_t Xpos, uint16_t Ypos, uint8_t Ascii);
+    uint32_t power(uint8_t m,uint8_t n);
     uint32_t getDisplayAddress();
     ~display();
 
@@ -84,7 +86,9 @@ private:
     public:
         int16_t X;
         int16_t Y;
-    }; 
+    };
+    uint8_t charSize;
+    uint8_t charMode;
     tft_lcd *tft_panel;
 };
 
