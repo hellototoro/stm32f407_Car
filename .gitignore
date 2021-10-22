@@ -1,0 +1,24 @@
+# eclipse stuff
+/Debug/
+/.settings/
+/Release/
+
+# TouchGFX
+TouchGFX/build/
+TouchGFX/generated/
+TouchGFX/target/generated/
+TouchGFX/simulator/
+TouchGFX/assets/
+
+# Middlewares 
+/Middlewares/
+
+# CMSIS
+/Drivers/
+
+# VScode
+.vscode
+
+# Emacs
+.#*
+.settings/language.settings.xml
