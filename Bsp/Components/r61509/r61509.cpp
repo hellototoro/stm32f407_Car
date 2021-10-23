@@ -656,8 +656,6 @@ void r61509::init(void)
 
     LCD_IO_WriteReg(0x0007);LCD_IO_WriteData(0x0100);
 
-    //LCD_IO_WriteReg(0x0202);
-    
     setDisplayDir(MyDrivers::displayDir::horizontal);      //默认为竖屏
     setCursor(0, 0);
     prepareWrite();

@@ -35,13 +35,14 @@ PID Motor_PID_r(&Input_r, &Output_r, &Setpoint_r, Kp_r, Ki_r, Kd_r, DIRECT);
 
 
 /* 函数声明 */
+void display_fram(void);
 void led_task(void);
 void motor_pid_control(void);
 
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
-    delay_interrupt_callback(htim);
+    //delay_interrupt_callback(htim);
     if (htim == encoder_timer) {/* @ TIM6_TICK_FREQ_DEFAULT ms定时器 */
         Motor_encoderTask();
     }
@@ -49,18 +50,19 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 
 void setup(void)
 {
-	//delay_start();
-	tft_display.init();
-	tft_display.clear(MyDrivers::lcd_color::WHITE);
-	tft_display.showString(10, 10, (char*)"test");
+    //delay_start();
+    tft_display.init();
+    tft_display.setCharSize(24);
+    tft_display.clear(MyDrivers::lcd_color::WHITE);
+    display_fram();
 
     startEncoder(encoders, 2);
 
     Motor_init();
     //Motor_move(FRONT);
     //turn the PID on
-    Setpoint_l = 100.f;
-    Setpoint_r = 100.f;
+    Setpoint_l = 80.f;
+    Setpoint_r = 80.f;
     Motor_PID_l.SetMode(AUTOMATIC);
     Motor_PID_r.SetMode(AUTOMATIC);
     Motor_PID_l.SetOutputLimits(0, 255);
@@ -71,9 +73,9 @@ void setup(void)
     //debug
     set_computer_value(SEND_STOP_CMD, CURVES_CH1, NULL, 0);    // 同步上位机的启动按钮状态
     set_computer_value(SEND_STOP_CMD, CURVES_CH2, NULL, 0);    // 同步上位机的启动按钮状态
-    //int32_t temp = (int32_t)Setpoint_l;
-    set_computer_value(SEND_TARGET_CMD, CURVES_CH1, (void *)&Setpoint_l, 1);     // 给通道 1 发送目标值
-    set_computer_value(SEND_TARGET_CMD, CURVES_CH2, (void *)&Setpoint_r, 1);     // 给通道 1 发送目标值
+    int32_t temp = (int32_t)Setpoint_l;
+    set_computer_value(SEND_TARGET_CMD, CURVES_CH1, &temp, 1);     // 给通道 1 发送目标值
+    set_computer_value(SEND_TARGET_CMD, CURVES_CH2, &temp, 1);     // 给通道 1 发送目标值
     pid_tool_start_receive();
 }
 
@@ -81,33 +83,41 @@ void loop(void)
 {
     Input_l = getSpeed_RPM(wheel_left);
     sprintf((char*)display_buffer, "%.02f", Input_l);
-    tft_display.showString(65, 10, (char*)display_buffer);
+    tft_display.showString(110, 10, (char*)display_buffer);
 
     Input_r = getSpeed_RPM(wheel_right);
     sprintf((char*)display_buffer, "%.02f", Input_r);
-    tft_display.showString(65, 30, (char*)display_buffer);
+    tft_display.showString(110, 40, (char*)display_buffer);
 
     if (Motor_PID_l.Compute() == true) {
         Motor_PID_Input(wheel_left, Output_l);
         sprintf((char*)display_buffer, "%.02f", Output_l);
-        tft_display.showString(75, 70, (char*)display_buffer);
+        tft_display.showString(120, 100, (char*)display_buffer);
         //debug
-        //int32_t temp = (int32_t)Input_l;
-        set_computer_value(SEND_FACT_CMD, CURVES_CH1, (void *)&Input_l, 1);
+        int32_t temp = (int32_t)Input_l;
+        set_computer_value(SEND_FACT_CMD, CURVES_CH1, &temp, 1);
     }
 
     if (Motor_PID_r.Compute() == true) {
         Motor_PID_Input(wheel_right, Output_r);
         sprintf((char*)display_buffer, "%.02f", Output_r);
-        tft_display.showString(75, 50, (char*)display_buffer);
+        tft_display.showString(120, 70, (char*)display_buffer);
         //debug
-        //int32_t temp = (int32_t)Input_r;
-        set_computer_value(SEND_FACT_CMD, CURVES_CH2, (void *)&Input_r, 1);
+        int32_t temp = (int32_t)Input_r;
+        set_computer_value(SEND_FACT_CMD, CURVES_CH2, &temp, 1);
     }
     /* 接收数据处理 */
     //debug
     analysis_rec_data();
     led_task();
+}
+
+void display_fram(void)
+{
+	tft_display.showString(10, 10, (char*)"Input_l:");
+	tft_display.showString(10, 40, (char*)"Input_r:");
+	tft_display.showString(10, 100, (char*)"Output_l:");
+	tft_display.showString(10, 70, (char*)"Output_r:");
 }
 
 void set_target_speed(Motor_WheelType wheel, double speed)
@@ -121,6 +131,6 @@ void led_task(void)
     uint32_t now = HAL_GetTick();
     if( (now - tick) >= 1000) {
         led1.toggle();
-    	tick = now;
+        tick = now;
     }
 }
