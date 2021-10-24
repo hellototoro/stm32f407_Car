@@ -53,6 +53,7 @@ extern double getSpeed(Motor_WheelType wheel);
 extern double getSpeed_RPM(Motor_WheelType wheel);
 extern double getMileage(Motor_WheelType wheel);
 extern void Motor_PID_Input(Motor_WheelType wheel, uint16_t input);
+extern void updateEncoderCounter(Encoder_HandleTypeDef *Encoder_Handle, encoder_info *encoder);
 
 #ifdef __cplusplus
 }

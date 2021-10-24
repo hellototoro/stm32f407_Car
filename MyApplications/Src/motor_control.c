@@ -185,13 +185,23 @@ static void calculate_rpm(uint16_t time, int32_t delta_counter, double *rpm)
 /*  每隔 @ TIM7_TICK_FREQ_DEFAULT 周期调用一次 */
 void Motor_encoderTask(void)
 {
-    getEncoderInfo(LEFT_encoder,&motor.left_encoder);
-    getEncoderInfo(RIGHT_encoder,&motor.right_encoder);
+    //getEncoderInfo(LEFT_encoder,&motor.left_encoder);
+    //getEncoderInfo(RIGHT_encoder,&motor.right_encoder);
+    int32_t counter_l = __HAL_TIM_GET_COUNTER(LEFT_encoder) + 
+                        (motor.left_encoder.overflow_count * __HAL_TIM_GET_AUTORELOAD(LEFT_encoder));
+    int32_t counter_r = __HAL_TIM_GET_COUNTER(RIGHT_encoder) + 
+                        (motor.right_encoder.overflow_count * __HAL_TIM_GET_AUTORELOAD(RIGHT_encoder));
+
+    motor.left_encoder.delta_counter = counter_l - motor.left_encoder.last_counter;
+    motor.right_encoder.delta_counter = counter_r - motor.right_encoder.last_counter;
 
     calculate_rpm(TIM6_TICK_FREQ_DEFAULT, motor.left_encoder.delta_counter, &motor.left_wheel.current_rpm);
     calculate_rpm(TIM6_TICK_FREQ_DEFAULT, motor.right_encoder.delta_counter, &motor.right_wheel.current_rpm);
     motor.left_wheel.mileage += motor.left_encoder.delta_counter;   /* 累计里程 */
     motor.right_wheel.mileage += motor.right_encoder.delta_counter; /* 累计里程 */
+
+    motor.left_encoder.last_counter = counter_l;
+    motor.right_encoder.last_counter = counter_r;
 }
 
 //速度单位：m/s

@@ -28,10 +28,13 @@ double Setpoint_r, Input_r, Output_r;
 
 //Specify the links and initial tuning parameters
 //double Kp=2, Ki=5, Kd=1;
-double Kp_l=0.88, Ki_l=5.3, Kd_l=0.00000;//150 ~ 200 rpm
-double Kp_r=0.8, Ki_r=3.0, Kd_r=0.00000;//150 ~ 200 rpm
+double Kp_l=2.567, Ki_l=7.500, Kd_l=0.001;//150 ~ 200 rpm
+double Kp_r=0.017, Ki_r=5.5, Kd_r=0.001;//150 ~ 200 rpm
 PID Motor_PID_l(&Input_l, &Output_l, &Setpoint_l, Kp_l, Ki_l, Kd_l, DIRECT);
 PID Motor_PID_r(&Input_r, &Output_r, &Setpoint_r, Kp_r, Ki_r, Kd_r, DIRECT);
+
+/* 外部变量声明 */
+extern motor_info motor;
 
 
 /* 函数声明 */
@@ -45,6 +48,10 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     //delay_interrupt_callback(htim);
     if (htim == encoder_timer) {/* @ TIM6_TICK_FREQ_DEFAULT ms定时器 */
         Motor_encoderTask();
+    } else if (htim == LEFT_encoder) {
+        updateEncoderCounter(LEFT_encoder, &motor.left_encoder);
+    } else if (htim == RIGHT_encoder) {
+        updateEncoderCounter(RIGHT_encoder, &motor.right_encoder);
     }
 }
 
@@ -67,8 +74,8 @@ void setup(void)
     Motor_PID_r.SetMode(AUTOMATIC);
     Motor_PID_l.SetOutputLimits(0, 255);
     Motor_PID_r.SetOutputLimits(0, 255);
-    Motor_PID_l.SetSampleTime(100);
-    Motor_PID_r.SetSampleTime(100);
+    Motor_PID_l.SetSampleTime(50);
+    Motor_PID_r.SetSampleTime(50);
 
     //debug
     set_computer_value(SEND_STOP_CMD, CURVES_CH1, NULL, 0);    // 同步上位机的启动按钮状态
@@ -81,30 +88,29 @@ void setup(void)
 
 void loop(void)
 {
+	int32_t temp;
     Input_l = getSpeed_RPM(wheel_left);
     sprintf((char*)display_buffer, "%.02f", Input_l);
     tft_display.showString(110, 10, (char*)display_buffer);
+    temp = (int32_t)Input_l;
+    set_computer_value(SEND_FACT_CMD, CURVES_CH1, &temp, 1);
 
     Input_r = getSpeed_RPM(wheel_right);
     sprintf((char*)display_buffer, "%.02f", Input_r);
     tft_display.showString(110, 40, (char*)display_buffer);
+    temp = (int32_t)Input_r;
+    set_computer_value(SEND_FACT_CMD, CURVES_CH2, &temp, 1);
 
     if (Motor_PID_l.Compute() == true) {
         Motor_PID_Input(wheel_left, Output_l);
         sprintf((char*)display_buffer, "%.02f", Output_l);
         tft_display.showString(120, 100, (char*)display_buffer);
-        //debug
-        int32_t temp = (int32_t)Input_l;
-        set_computer_value(SEND_FACT_CMD, CURVES_CH1, &temp, 1);
     }
 
     if (Motor_PID_r.Compute() == true) {
         Motor_PID_Input(wheel_right, Output_r);
         sprintf((char*)display_buffer, "%.02f", Output_r);
         tft_display.showString(120, 70, (char*)display_buffer);
-        //debug
-        int32_t temp = (int32_t)Input_r;
-        set_computer_value(SEND_FACT_CMD, CURVES_CH2, &temp, 1);
     }
     /* 接收数据处理 */
     //debug

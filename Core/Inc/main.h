@@ -72,7 +72,7 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
-#define TIM6_TICK_FREQ_DEFAULT 20
+#define TIM6_TICK_FREQ_DEFAULT 50
 #define LED1_Pin GPIO_PIN_9
 #define LED1_GPIO_Port GPIOF
 #define LED2_Pin GPIO_PIN_10
@@ -104,9 +104,8 @@ void Error_Handler(void);
 #define TOUCH_IRQ_Pin GPIO_PIN_1
 #define TOUCH_IRQ_GPIO_Port GPIOB
 #define TOUCH_IRQ_EXTI_IRQn EXTI1_IRQn
-#define LCD_TE_SIGNAL_Pin GPIO_PIN_15
-#define LCD_TE_SIGNAL_GPIO_Port GPIOB
-#define LCD_TE_SIGNAL_EXTI_IRQn EXTI15_10_IRQn
+#define LCD_BL_Pin GPIO_PIN_15
+#define LCD_BL_GPIO_Port GPIOB
 #define SOFT_I2C_SCL_Pin GPIO_PIN_6
 #define SOFT_I2C_SCL_GPIO_Port GPIOD
 #define SOFT_I2C_SDA_Pin GPIO_PIN_7
@@ -124,6 +123,7 @@ extern PWM_HandleTypeDef *RIGHT_motor_pwm;
 extern TIM_HandleTypeDef *encoder_timer;
 extern Encoder_HandleTypeDef *LEFT_encoder;
 extern Encoder_HandleTypeDef *RIGHT_encoder;
+#define GET_BASIC_TIM_PERIOD()      ((__HAL_TIM_GET_AUTORELOAD(encoder_timer)+1)/50.0)     // 获取定时器的周期，单位ms
 
 /* USER CODE END Private defines */
 
