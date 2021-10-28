@@ -16,6 +16,9 @@
 #define PWM_HANDLE(dir)         dir##_motor_pwm                         //dir: @ LEFT RIGHT FRONT BACK
 #define LEFT_CHANNEL            TIM_CHANNEL_1
 #define RIGHT_CHANNEL           TIM_CHANNEL_2
+#define CHANNEL(dir)            dir##_CHANNEL
+
+#define ENCODER_HANDLE(dir)     dir##_encoder
 
 /* 外部变量声明 */
 
@@ -28,70 +31,77 @@ void MyCar::init(void)
 {
     left_wheel.init(MOTOR_PORT(LEFT,P), MOTOR_PIN(LEFT,P), //LEFT_MOTOR_P_GPIO_Port
                     MOTOR_PORT(LEFT,N), MOTOR_PIN(LEFT,N), 
-                    PWM_HANDLE(LEFT), LEFT_CHANNEL, 
-                    LEFT_encoder);
+                    PWM_HANDLE(LEFT), CHANNEL(LEFT), 
+                    ENCODER_HANDLE(LEFT));
     right_wheel.init(MOTOR_PORT(RIGHT,P), MOTOR_PIN(RIGHT,P), 
                      MOTOR_PORT(RIGHT,N), MOTOR_PIN(RIGHT,N), 
-                     PWM_HANDLE(RIGHT), RIGHT_CHANNEL,
-                     RIGHT_encoder);
+                     PWM_HANDLE(RIGHT), CHANNEL(RIGHT),
+                     ENCODER_HANDLE(RIGHT));
+    left_wheel.PID_Init(5.0, 2.0, 0.0,  //速度环pid
+                        0.0, 0.0, 0.0); //位置环pid
+    right_wheel.PID_Init(5.0, 2.0, 0.0, //速度环pid
+                         0.0, 0.0, 0.0);//位置环pid
     HAL_TIM_Base_Start_IT(encoder_timer);
 }
 
 void MyCar::power_on(void)
 {
-    left_wheel.motor.start();
-    right_wheel.motor.start();
+    left_wheel.start();
+    right_wheel.start();
 }
 
 void MyCar::move_front(double speed, double distance)
 {
-    left_wheel.motor.setSpeed(speed);
-    left_wheel.motor.run(MyDrivers::motor::plus);
-
-    right_wheel.motor.setSpeed(speed);
-    right_wheel.motor.run(MyDrivers::motor::plus);
+    if (distance > 0.f) {
+        left_wheel.setLocation(distance);
+        right_wheel.setLocation(distance);
+    } else {
+        left_wheel.setSpeed(speed);
+        right_wheel.setSpeed(speed);
+    }
+    left_wheel.run_front();
+    right_wheel.run_front();
 }
 
 void MyCar::move_back(double speed, double distance)
 {
-    left_wheel.current_speed = speed;
-    //left_wheel.motor.setDutyCycle(0);
-    left_wheel.motor.run(MyDrivers::motor::minus);
-
-    right_wheel.current_speed = speed;
-    //right_wheel.motor.setDutyCycle(0);
-    right_wheel.motor.run(MyDrivers::motor::minus);
+    if (distance > 0.f) {
+        left_wheel.setLocation(distance);
+        right_wheel.setLocation(distance);
+    } else {
+        left_wheel.setSpeed(speed);
+        right_wheel.setSpeed(speed);
+    }
+    left_wheel.run_back();
+    right_wheel.run_back();
 }
 
 void MyCar::turn_left(double speed, double angle)
 {
-    left_wheel.current_speed = speed;
-    //left_wheel.motor.setDutyCycle(0);
-    left_wheel.motor.run(MyDrivers::motor::plus);
+    double distance = angle * ratio;
 
-    right_wheel.current_speed = speed;
-    //right_wheel.motor.setDutyCycle(0);
-    right_wheel.motor.run(MyDrivers::motor::minus);
+    left_wheel.setLocation(distance);
+    left_wheel.run_front();
+
+    right_wheel.setLocation(distance);
+    right_wheel.run_back();
 }
 
 void MyCar::turn_right(double speed, double angle)
 {
-    left_wheel.current_speed = speed;
-    //left_wheel.motor.setDutyCycle(0);
-    left_wheel.motor.run(MyDrivers::motor::minus);
+    double distance = angle * ratio;
 
-    right_wheel.current_speed = speed;
-    //right_wheel.motor.setDutyCycle(0);
-    right_wheel.motor.run(MyDrivers::motor::plus);
+    left_wheel.setLocation(distance);
+    left_wheel.run_back();
+
+    right_wheel.setLocation(distance);
+    right_wheel.run_front();
 }
 
 void MyCar::stop(void)
 {
-    //left_wheel.motor.setDutyCycle(0);
-    left_wheel.motor.off();
-
-    //right_wheel.motor.setDutyCycle(0);
-    right_wheel.motor.off();
+    left_wheel.stop();
+    right_wheel.stop();
 }
 
 

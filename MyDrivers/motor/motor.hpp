@@ -32,17 +32,15 @@ public:
               GPIO_TypeDef* motor_port_n, uint16_t motor_pin_n, 
               PWM_HandleTypeDef *motor_PWM_Handle, uint32_t PWM_Channel, 
               Encoder_HandleTypeDef *Encoder_Handle);
+    void locationPID_Init(double kp, double ki, double kd);
+    void speedPID_Init(double kp, double ki, double kd);
     void start(void);
     void run(run_direction direction);
     void off(void);
-    void setLocation(double location);
+    void setLocation(int32_t counter);
     void setSpeed(double speed);
     double getRPM(void);
     void loopTask(uint16_t period, double &mileage, double ratio);
-
-    void locationPidInit(double kp, double ki, double kd);
-    void speedPidInit(double kp, double ki, double kd);
-
     virtual ~motor() {}
 
 private:

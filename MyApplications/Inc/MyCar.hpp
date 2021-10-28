@@ -10,6 +10,7 @@
 
 #include "main.h"
 #include "MyWheel.hpp"
+#include <math.h>
 
 class MyCar {
 public:
@@ -24,19 +25,12 @@ public:
     void stop(void);
     virtual ~MyCar();
 public:
-    enum direction{
-        front,
-        back,
-        left,
-        right
-    };
     MyWheel left_wheel;
     MyWheel right_wheel;
 private:
-
-
+    constexpr static double radiusOfTwoWheel = 0.156f;//两轮中心距离
+    constexpr static double ratio = (M_PI * radiusOfTwoWheel) / 180.f;
 private:
-    void Configure_DutyCycle(PWM_HandleTypeDef *PWM_Handle, uint32_t Channel, uint16_t D);
 };
 
 #endif /* INC_MYCAR_HPP_ */

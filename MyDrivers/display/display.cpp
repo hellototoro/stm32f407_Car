@@ -73,10 +73,8 @@ void display::showChar(uint16_t x,uint16_t y,char ch)
         for( t1 = 0; t1 < 8; t1++ )
         {
             if( temp & 0x80 ) {
-                //LCD_DrawPoint(x,y,lcd_dev.color.front);
                 tft_panel->writePixel(x, y, static_cast<uint16_t>(DrawProp.TextColor));
             } else if( charMode == 0 ) {
-                //LCD_DrawPoint(x,y,lcd_dev.color.back);
                 tft_panel->writePixel(x, y, static_cast<uint16_t>(DrawProp.BackColor));
             }
             temp <<= 1;

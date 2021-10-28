@@ -10,6 +10,7 @@
 
 #include "main.h"
 #include <motor/motor.hpp>
+#include <math.h>
 
 class MyWheel
 {
@@ -21,24 +22,55 @@ public:
 
 public:
     MyWheel() {}
+
     void init(GPIO_TypeDef* motor_port_p, uint16_t motor_pin_p, 
               GPIO_TypeDef* motor_port_n, uint16_t motor_pin_n, 
               PWM_HandleTypeDef *motor_PWM_Handle, uint32_t PWM_Channel, 
               Encoder_HandleTypeDef *Encoder_Handle) {
         motor.init(motor_port_p, motor_pin_p, motor_port_n, motor_pin_n, motor_PWM_Handle, PWM_Channel, Encoder_Handle);
     }
+
+    void PID_Init(double s_kp, double s_ki, double s_kd, 
+                  double l_kp, double l_ki, double l_kd) {
+        motor.speedPID_Init(s_kp, s_ki, s_kd);
+        motor.locationPID_Init(l_kp, l_ki, l_kd);
+    }
+
+    void start(void) {
+        motor.start();
+    }
+
+    void run_front(void) {
+        motor.run(MyDrivers::motor::plus);
+    }
+
+    void run_back(void) {
+        motor.run(MyDrivers::motor::minus);
+    }
+
+    void stop(void) {
+        motor.off();
+    }
+    void setSpeed(double speed) {
+        motor.setSpeed(speed);
+    }
+
+    void setLocation(double distance) {
+        motor.setLocation((int32_t)distance / ratio());
+    }
+
     void loopTask(uint16_t period) {
         motor.loopTask(period, mileage, ratio());
     }
+    
     virtual ~MyWheel() {}
 
 private:
     constexpr static double diameter = 0.048f;      //轮子直径，单位：m
-    constexpr static double PI = 3.1415f;
 
 private:
     constexpr double ratio() {
-        return (PI * diameter) / motor.encoder.resolution(4);
+        return (M_PI * diameter) / motor.encoder.resolution(4);
     }
 };
 

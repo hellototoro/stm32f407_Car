@@ -9,7 +9,8 @@ extern "C" {
 
 extern void setup(void);
 extern void loop(void);
-void set_target_speed(Motor_WheelType wheel, double speed);
+extern void TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim);
+extern void set_target_speed(Motor_WheelType wheel, double speed);
 
 #ifdef __cplusplus
 }

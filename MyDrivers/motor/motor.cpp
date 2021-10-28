@@ -44,26 +44,30 @@ void motor::off(void)
     HAL_GPIO_WritePin(motor_port_n, motor_pin_n, GPIO_PIN_RESET);
 }
 
-void motor::setLocation(double location)
+void motor::setLocation(int32_t counter)
 {
-    location_pid.output_val = 0.0;
-    location_pid.err = 0.0;
-    location_pid.err_last = 0.0;
-    location_pid.integral = 0.0;
-    location_pid.target_val = location;
+    if (speed_pid_tag) {
+        speed_pid_tag = false;
+        location_pid.output_val = 0.0;
+        location_pid.err = 0.0;
+        location_pid.err_last = 0.0;
+        location_pid.integral = 0.0;
+    }
+    location_pid.target_val = counter;
     location_pid_tag = true;
-    speed_pid_tag = false;
 }
 
 void motor::setSpeed(double speed)
 {
-    speed_pid.output_val = 0.0;
-    speed_pid.err = 0.0;
-    speed_pid.err_last = 0.0;
-    speed_pid.integral = 0.0;
+    if (location_pid_tag) {
+        location_pid_tag = false;
+        speed_pid.output_val = 0.0;
+        speed_pid.err = 0.0;
+        speed_pid.err_last = 0.0;
+        speed_pid.integral = 0.0;
+    }
     speed_pid.target_val = speed;
     speed_pid_tag = true;
-    location_pid_tag = false;
 }
 
 double motor::getRPM(void)
@@ -114,12 +118,12 @@ void motor::loopTask(uint16_t period, double &mileage, double mileage_ratio)
     }
 }
 
-void motor::locationPidInit(double kp, double ki, double kd)
+void motor::locationPID_Init(double kp, double ki, double kd)
 {
     PID_param_init(&location_pid, kp, ki, kd, 0, 255);
 }
 
-void motor::speedPidInit(double kp, double ki, double kd)
+void motor::speedPID_Init(double kp, double ki, double kd)
 {
     PID_param_init(&speed_pid, kp, ki, kd, 0, 255);
 }

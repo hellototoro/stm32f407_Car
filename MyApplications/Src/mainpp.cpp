@@ -42,7 +42,7 @@ void led_task(void);
 //void motor_pid_control(void);
 
 
-void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+void TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
     //delay_interrupt_callback(htim);
     if (htim == encoder_timer) {/* @ TIM6_TICK_FREQ_DEFAULT ms定时器 */
@@ -67,7 +67,6 @@ void setup(void)
 
     car.init();
     car.power_on();
-    car.left_wheel.motor.speedPidInit(Kp_l, Ki_l, Kd_l);
     Setpoint_l = 80.f;
     car.move_front(Setpoint_l);
 
