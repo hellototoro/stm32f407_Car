@@ -214,3 +214,24 @@ double PID::GetKd() { return  dispKd; }
 int PID::GetMode()  { return  inAuto ? AUTOMATIC : MANUAL; }
 int PID::GetDirection() { return controllerDirection; }
 
+
+//add by HuangJian
+void PID::init(double* Input, double* Output, double* Setpoint,
+        double Kp, double Ki, double Kd, int ControllerDirection)
+{
+    myOutput = Output;
+    myInput = Input;
+    mySetpoint = Setpoint;
+    inAuto = false;
+
+    PID::SetOutputLimits(0, 255);   //default output limit corresponds to
+                                    //the arduino pwm limits
+
+    SampleTime = 100;               //default Controller Sample Time is 0.1 seconds
+
+    PID::SetControllerDirection(ControllerDirection);
+    PID::SetTunings(Kp, Ki, Kd, P_ON_E);
+
+    lastTime = HAL_GetTick()-SampleTime;
+}
+

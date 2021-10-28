@@ -3,8 +3,7 @@
 #include "led/led.hpp"
 #include "oled/oled.hpp"
 #include "delay.h"
-#include "encoder/encoder.h"
-#include "motor_control.h"
+#include "MyCar.hpp"
 #include "PID/PID_v1.h"
 #include "tools/pid_tool/protocol.h"
 #include "s6d04d1/s6d04d1.hpp"
@@ -12,7 +11,7 @@
 #include "display/display.hpp"
 
 MyDrivers::led led1(1);
-
+MyCar car;
 //oled display;
 //s6d04d1 s6d0;
 r61509 r61509;
@@ -23,38 +22,41 @@ uint8_t display_buffer[20];
 
 /* PID相关变量 */
 //Define Variables we'll be connecting to
-double Setpoint_l, Input_l, Output_l;
+//double Setpoint_l, Input_l, Output_l;
 double Setpoint_r, Input_r, Output_r;
 
 //Specify the links and initial tuning parameters
 //double Kp=2, Ki=5, Kd=1;
-double Kp_l=2.567, Ki_l=7.500, Kd_l=0.001;//150 ~ 200 rpm
-double Kp_r=0.017, Ki_r=5.5, Kd_r=0.001;//150 ~ 200 rpm
-PID Motor_PID_l(&Input_l, &Output_l, &Setpoint_l, Kp_l, Ki_l, Kd_l, DIRECT);
-PID Motor_PID_r(&Input_r, &Output_r, &Setpoint_r, Kp_r, Ki_r, Kd_r, DIRECT);
+//double Kp_l=2.567, Ki_l=7.500, Kd_l=0.001;//150 ~ 200 rpm
+//double Kp_r=0.017, Ki_r=5.5, Kd_r=0.001;//150 ~ 200 rpm
+//PID Motor_PID_l(&Input_l, &Output_l, &Setpoint_l, Kp_l, Ki_l, Kd_l, DIRECT);
+//PID Motor_PID_r(&Input_r, &Output_r, &Setpoint_r, Kp_r, Ki_r, Kd_r, DIRECT);
 
 /* 外部变量声明 */
-extern motor_info motor;
+//extern motor_info motor;
 
 
 /* 函数声明 */
 void display_fram(void);
 void led_task(void);
-void motor_pid_control(void);
+//void motor_pid_control(void);
 
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
     //delay_interrupt_callback(htim);
     if (htim == encoder_timer) {/* @ TIM6_TICK_FREQ_DEFAULT ms定时器 */
-        Motor_encoderTask();
+        car.left_wheel.loopTask(TIM6_TICK_FREQ_DEFAULT);
+        car.right_wheel.loopTask(TIM6_TICK_FREQ_DEFAULT);
     } else if (htim == LEFT_encoder) {
-        updateEncoderCounter(LEFT_encoder, &motor.left_encoder);
+        car.left_wheel.motor.encoder.interrput();
     } else if (htim == RIGHT_encoder) {
-        updateEncoderCounter(RIGHT_encoder, &motor.right_encoder);
+        car.right_wheel.motor.encoder.interrput();
     }
 }
 
+double Kp_l=5.0, Ki_l=2.0, Kd_l=0.0;//150 ~ 200 rpm
+double Setpoint_l, Input_l, Output_l;
 void setup(void)
 {
     //delay_start();
@@ -63,32 +65,34 @@ void setup(void)
     tft_display.clear(MyDrivers::lcd_color::WHITE);
     display_fram();
 
-    startEncoder(encoders, 2);
-
-    Motor_init();
-    //Motor_move(FRONT);
-    //turn the PID on
+    car.init();
+    car.power_on();
+    car.left_wheel.motor.speedPidInit(Kp_l, Ki_l, Kd_l);
     Setpoint_l = 80.f;
-    Setpoint_r = 80.f;
-    Motor_PID_l.SetMode(AUTOMATIC);
-    Motor_PID_r.SetMode(AUTOMATIC);
-    Motor_PID_l.SetOutputLimits(0, 255);
-    Motor_PID_r.SetOutputLimits(0, 255);
-    Motor_PID_l.SetSampleTime(50);
-    Motor_PID_r.SetSampleTime(50);
+    car.move_front(Setpoint_l);
+
+    //turn the PID on
+    //Setpoint_l = 80.f;
+    //Setpoint_r = 80.f;
+    //Motor_PID_l.SetMode(AUTOMATIC);
+    //Motor_PID_r.SetMode(AUTOMATIC);
+    //Motor_PID_l.SetOutputLimits(0, 255);
+    //Motor_PID_r.SetOutputLimits(0, 255);
+    //Motor_PID_l.SetSampleTime(50);
+    //Motor_PID_r.SetSampleTime(50);
 
     //debug
     set_computer_value(SEND_STOP_CMD, CURVES_CH1, NULL, 0);    // 同步上位机的启动按钮状态
-    set_computer_value(SEND_STOP_CMD, CURVES_CH2, NULL, 0);    // 同步上位机的启动按钮状态
+    //set_computer_value(SEND_STOP_CMD, CURVES_CH2, NULL, 0);    // 同步上位机的启动按钮状态
     int32_t temp = (int32_t)Setpoint_l;
     set_computer_value(SEND_TARGET_CMD, CURVES_CH1, &temp, 1);     // 给通道 1 发送目标值
-    set_computer_value(SEND_TARGET_CMD, CURVES_CH2, &temp, 1);     // 给通道 1 发送目标值
-    pid_tool_start_receive();
+    //set_computer_value(SEND_TARGET_CMD, CURVES_CH2, &temp, 1);     // 给通道 1 发送目标值
+    //pid_tool_start_receive();
 }
 
 void loop(void)
 {
-	int32_t temp;
+    /*int32_t temp;
     Input_l = getSpeed_RPM(wheel_left);
     sprintf((char*)display_buffer, "%.02f", Input_l);
     tft_display.showString(110, 10, (char*)display_buffer);
@@ -111,19 +115,28 @@ void loop(void)
         Motor_PID_Input(wheel_right, Output_r);
         sprintf((char*)display_buffer, "%.02f", Output_r);
         tft_display.showString(120, 70, (char*)display_buffer);
-    }
+    }*/
     /* 接收数据处理 */
     //debug
-    analysis_rec_data();
+    //analysis_rec_data();
+
+
+    int32_t temp;
+    sprintf((char*)display_buffer, "%.02f", car.left_wheel.motor.getRPM());
+    tft_display.showString(110, 10, (char*)display_buffer);
+    temp = (int32_t)car.left_wheel.motor.getRPM();
+    set_computer_value(SEND_FACT_CMD, CURVES_CH1, &temp, 1);
     led_task();
+    //debug
+    analysis_rec_data();
 }
 
 void display_fram(void)
 {
-	tft_display.showString(10, 10, (char*)"Input_l:");
-	tft_display.showString(10, 40, (char*)"Input_r:");
-	tft_display.showString(10, 100, (char*)"Output_l:");
-	tft_display.showString(10, 70, (char*)"Output_r:");
+    tft_display.showString(10, 10, (char*)"Input_l:");
+    tft_display.showString(10, 40, (char*)"Input_r:");
+    tft_display.showString(10, 100, (char*)"Output_l:");
+    tft_display.showString(10, 70, (char*)"Output_r:");
 }
 
 void set_target_speed(Motor_WheelType wheel, double speed)
