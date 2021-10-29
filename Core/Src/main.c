@@ -20,6 +20,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "cmsis_os.h"
+#include "app_touchgfx.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -42,6 +43,8 @@
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
+CRC_HandleTypeDef hcrc;
+
 I2C_HandleTypeDef hi2c1;
 
 RTC_HandleTypeDef hrtc;
@@ -61,6 +64,22 @@ SRAM_HandleTypeDef hsram1;
 SRAM_HandleTypeDef hsram2;
 
 osThreadId defaultTaskHandle;
+osThreadId CarTaskHandle;
+uint32_t CarTaskBuffer[ 1024 ];
+osStaticThreadDef_t CarTaskControlBlock;
+osThreadId LEDTaskHandle;
+uint32_t LEDTaskBuffer[ 128 ];
+osStaticThreadDef_t LEDTaskControlBlock;
+osThreadId DisplayTaskHandle;
+uint32_t DisplayTaskBuffer[ 1024 ];
+osStaticThreadDef_t DisplayTaskControlBlock;
+osThreadId UartTaskHandle;
+uint32_t UartTaskBuffer[ 1024 ];
+osStaticThreadDef_t UartTaskControlBlock;
+osThreadId GUITaskHandle;
+uint32_t GUITaskBuffer[ 4096 ];
+osStaticThreadDef_t GUITaskControlBlock;
+osSemaphoreId UartReceivedHandle;
 /* USER CODE BEGIN PV */
 //DCMI_HandleTypeDef *DCMI_Handle = &hdcmi;
 RTC_HandleTypeDef *RtcHandle = &hrtc;
@@ -89,7 +108,13 @@ static void MX_RTC_Init(void);
 static void MX_TIM6_Init(void);
 static void MX_USART1_UART_Init(void);
 static void MX_TIM3_Init(void);
+static void MX_CRC_Init(void);
 void StartDefaultTask(void const * argument);
+extern void StartCarTask(void const * argument);
+extern void StartLEDTask(void const * argument);
+extern void StartDisplayTask(void const * argument);
+extern void StartUartTask(void const * argument);
+extern void StartGUITask(void const * argument);
 
 /* USER CODE BEGIN PFP */
 
@@ -138,6 +163,8 @@ int main(void)
   MX_TIM6_Init();
   MX_USART1_UART_Init();
   MX_TIM3_Init();
+  MX_CRC_Init();
+  MX_TouchGFX_Init();
   /* USER CODE BEGIN 2 */
   setup();
   /* USER CODE END 2 */
@@ -145,6 +172,11 @@ int main(void)
   /* USER CODE BEGIN RTOS_MUTEX */
   /* add mutexes, ... */
   /* USER CODE END RTOS_MUTEX */
+
+  /* Create the semaphores(s) */
+  /* definition and creation of UartReceived */
+  osSemaphoreDef(UartReceived);
+  UartReceivedHandle = osSemaphoreCreate(osSemaphore(UartReceived), 1);
 
   /* USER CODE BEGIN RTOS_SEMAPHORES */
   /* add semaphores, ... */
@@ -163,12 +195,32 @@ int main(void)
   osThreadDef(defaultTask, StartDefaultTask, osPriorityNormal, 0, 128);
   defaultTaskHandle = osThreadCreate(osThread(defaultTask), NULL);
 
+  /* definition and creation of CarTask */
+  osThreadStaticDef(CarTask, StartCarTask, osPriorityNormal, 0, 1024, CarTaskBuffer, &CarTaskControlBlock);
+  CarTaskHandle = osThreadCreate(osThread(CarTask), NULL);
+
+  /* definition and creation of LEDTask */
+  osThreadStaticDef(LEDTask, StartLEDTask, osPriorityLow, 0, 128, LEDTaskBuffer, &LEDTaskControlBlock);
+  LEDTaskHandle = osThreadCreate(osThread(LEDTask), NULL);
+
+  /* definition and creation of DisplayTask */
+  osThreadStaticDef(DisplayTask, StartDisplayTask, osPriorityNormal, 0, 1024, DisplayTaskBuffer, &DisplayTaskControlBlock);
+  DisplayTaskHandle = osThreadCreate(osThread(DisplayTask), NULL);
+
+  /* definition and creation of UartTask */
+  osThreadStaticDef(UartTask, StartUartTask, osPriorityNormal, 0, 1024, UartTaskBuffer, &UartTaskControlBlock);
+  UartTaskHandle = osThreadCreate(osThread(UartTask), NULL);
+
+  /* definition and creation of GUITask */
+  osThreadStaticDef(GUITask, StartGUITask, osPriorityNormal, 0, 4096, GUITaskBuffer, &GUITaskControlBlock);
+  GUITaskHandle = osThreadCreate(osThread(GUITask), NULL);
+
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
   /* USER CODE END RTOS_THREADS */
 
   /* Start scheduler */
-  //osKernelStart();
+  osKernelStart();
 
   /* We should never get here as control is now taken by the scheduler */
   /* Infinite loop */
@@ -225,6 +277,32 @@ void SystemClock_Config(void)
   {
     Error_Handler();
   }
+}
+
+/**
+  * @brief CRC Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_CRC_Init(void)
+{
+
+  /* USER CODE BEGIN CRC_Init 0 */
+
+  /* USER CODE END CRC_Init 0 */
+
+  /* USER CODE BEGIN CRC_Init 1 */
+
+  /* USER CODE END CRC_Init 1 */
+  hcrc.Instance = CRC;
+  if (HAL_CRC_Init(&hcrc) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN CRC_Init 2 */
+
+  /* USER CODE END CRC_Init 2 */
+
 }
 
 /**
@@ -441,7 +519,7 @@ static void MX_TIM6_Init(void)
   htim6.Instance = TIM6;
   htim6.Init.Prescaler = 8400-1;
   htim6.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim6.Init.Period = TIM6_TICK_FREQ_DEFAULT*10-1;
+  htim6.Init.Period = ENCODER_TICK_FREQ_DEFAULT*10-1;
   htim6.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;
   if (HAL_TIM_Base_Init(&htim6) != HAL_OK)
   {

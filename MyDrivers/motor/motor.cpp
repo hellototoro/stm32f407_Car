@@ -6,6 +6,7 @@
  */
 
 #include <motor/motor.hpp>
+#include <math.h>
 
 namespace MyDrivers {
 
@@ -53,7 +54,7 @@ void motor::setLocation(int32_t counter)
         location_pid.err_last = 0.0;
         location_pid.integral = 0.0;
     }
-    location_pid.target_val = counter;
+    location_pid.target_val = counter + abs(encoder.sum_counter);
     location_pid_tag = true;
 }
 
@@ -99,22 +100,22 @@ void motor::setDutyCycle(uint16_t D)
 
 void motor::loopTask(uint16_t period, double &mileage, double mileage_ratio)
 {
-    int32_t counter = encoder.getEncoderCounter() + (encoder.overflow * encoder.getPeriod());
+    encoder.sum_counter = encoder.getEncoderCounter() + (encoder.overflow * encoder.getPeriod());
 
-    encoder.delta_counter = counter - encoder.last_counter;
+    encoder.delta_counter = encoder.sum_counter - encoder.last_counter;
 
     real_time_rpm = encoder.delta_counter * ratio(period);//(encoder.delta_counter * 1000 * 60.f) / (encoder.resolution(4) * (double)period);//转/分钟
 
     //encoder.sum_counter += encoder.delta_counter;
     mileage += encoder.delta_counter * mileage_ratio;
 
-    encoder.last_counter = counter;
+    encoder.last_counter = encoder.sum_counter;
 
     if (location_pid_tag) {
-        setDutyCycle(location_pid_realize(&location_pid, counter));
+        setDutyCycle(location_pid_realize(&location_pid, abs(encoder.sum_counter)));
     }
     if (speed_pid_tag) {
-        setDutyCycle(speed_pid_realize(&speed_pid, real_time_rpm));
+        setDutyCycle(speed_pid_realize(&speed_pid, abs(real_time_rpm)));
     }
 }
 

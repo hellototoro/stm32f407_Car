@@ -52,7 +52,7 @@ void MyCar::power_on(void)
 
 void MyCar::move_front(double speed, double distance)
 {
-    if (distance > 0.f) {
+    if (distance > 0.1f) {
         left_wheel.setLocation(distance);
         right_wheel.setLocation(distance);
     } else {
@@ -104,6 +104,17 @@ void MyCar::stop(void)
     right_wheel.stop();
 }
 
+void MyCar::timeout_interrput(TIM_HandleTypeDef *htim)
+{
+    if (htim == encoder_timer) {/* @ ENCODER_TICK_FREQ_DEFAULT ms定时器 */
+        left_wheel.loopTask(ENCODER_TICK_FREQ_DEFAULT);
+        right_wheel.loopTask(ENCODER_TICK_FREQ_DEFAULT);
+    } else if (htim == LEFT_encoder) {
+        left_wheel.motor.encoder.interrput();
+    } else if (htim == RIGHT_encoder) {
+        right_wheel.motor.encoder.interrput();
+    }
+}
 
 MyCar::~MyCar() {
     // TODO Auto-generated destructor stub

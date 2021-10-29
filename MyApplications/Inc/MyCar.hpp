@@ -14,22 +14,26 @@
 
 class MyCar {
 public:
+    MyWheel left_wheel;
+    MyWheel right_wheel;
+
+public:
     MyCar();
     void init(void);
     void power_on(void);
     void power_off(void);
-    void move_front(double speed, double distance = 0);
-    void move_back(double speed, double distance = 0);
-    void turn_left(double speed, double angle = 0);
-    void turn_right(double speed, double angle = 0);
+    void move_front(double speed, double distance = 0.f);
+    void move_back(double speed, double distance = 0.f);
+    void turn_left(double speed, double angle = 0.f);
+    void turn_right(double speed, double angle = 0.f);
     void stop(void);
+    void timeout_interrput(TIM_HandleTypeDef *htim);
     virtual ~MyCar();
-public:
-    MyWheel left_wheel;
-    MyWheel right_wheel;
+
 private:
     constexpr static double radiusOfTwoWheel = 0.156f;//两轮中心距离
     constexpr static double ratio = (M_PI * radiusOfTwoWheel) / 180.f;
+
 private:
 };
 

@@ -15,8 +15,8 @@
 class MyWheel
 {
 public:
-    double current_speed;       /* 当前轮子速度（线速度），单位：m/s */
-    double target_speed;
+    //double current_speed;       /* 当前轮子速度（线速度），单位：m/s */
+    double target_value;
     double mileage;             /* 当前轮子总里程，单位：m */
     MyDrivers::motor motor;
 
@@ -51,12 +51,24 @@ public:
     void stop(void) {
         motor.off();
     }
+
     void setSpeed(double speed) {
+        target_value = speed;
         motor.setSpeed(speed);
     }
 
     void setLocation(double distance) {
-        motor.setLocation((int32_t)distance / ratio());
+        double counter = distance / ratio();
+        target_value = counter;
+        motor.setLocation((int32_t)counter);
+    }
+
+    double getSpeed_RPM(void) {
+        return motor.getRPM();
+    }
+
+    double getTargetValue(void) {
+        return target_value;
     }
 
     void loopTask(uint16_t period) {
@@ -69,8 +81,8 @@ private:
     constexpr static double diameter = 0.048f;      //轮子直径，单位：m
 
 private:
-    constexpr double ratio() {
-        return (M_PI * diameter) / motor.encoder.resolution(4);
+    constexpr static double ratio() {
+        return (M_PI * diameter) / MyDrivers::hw_encoder::resolution(4);
     }
 };
 
