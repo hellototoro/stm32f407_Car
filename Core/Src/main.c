@@ -79,7 +79,7 @@ osStaticThreadDef_t UartTaskControlBlock;
 osThreadId GUITaskHandle;
 uint32_t GUITaskBuffer[ 4096 ];
 osStaticThreadDef_t GUITaskControlBlock;
-osSemaphoreId UartReceivedHandle;
+osSemaphoreId SemUartReceivedHandle;
 /* USER CODE BEGIN PV */
 //DCMI_HandleTypeDef *DCMI_Handle = &hdcmi;
 RTC_HandleTypeDef *RtcHandle = &hrtc;
@@ -174,9 +174,9 @@ int main(void)
   /* USER CODE END RTOS_MUTEX */
 
   /* Create the semaphores(s) */
-  /* definition and creation of UartReceived */
-  osSemaphoreDef(UartReceived);
-  UartReceivedHandle = osSemaphoreCreate(osSemaphore(UartReceived), 1);
+  /* definition and creation of SemUartReceived */
+  osSemaphoreDef(SemUartReceived);
+  SemUartReceivedHandle = osSemaphoreCreate(osSemaphore(SemUartReceived), 1);
 
   /* USER CODE BEGIN RTOS_SEMAPHORES */
   /* add semaphores, ... */
@@ -209,7 +209,7 @@ int main(void)
 
   /* definition and creation of UartTask */
   osThreadStaticDef(UartTask, StartUartTask, osPriorityNormal, 0, 1024, UartTaskBuffer, &UartTaskControlBlock);
-  UartTaskHandle = osThreadCreate(osThread(UartTask), NULL);
+  UartTaskHandle = osThreadCreate(osThread(UartTask), (void*) SemUartReceivedHandle);
 
   /* definition and creation of GUITask */
   osThreadStaticDef(GUITask, StartGUITask, osPriorityNormal, 0, 4096, GUITaskBuffer, &GUITaskControlBlock);

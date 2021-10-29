@@ -109,9 +109,9 @@ void MyCar::timeout_interrput(TIM_HandleTypeDef *htim)
     if (htim == encoder_timer) {/* @ ENCODER_TICK_FREQ_DEFAULT ms定时器 */
         left_wheel.loopTask(ENCODER_TICK_FREQ_DEFAULT);
         right_wheel.loopTask(ENCODER_TICK_FREQ_DEFAULT);
-    } else if (htim == LEFT_encoder) {
+    } else if (htim == ENCODER_HANDLE(LEFT)) {
         left_wheel.motor.encoder.interrput();
-    } else if (htim == RIGHT_encoder) {
+    } else if (htim == ENCODER_HANDLE(RIGHT)) {
         right_wheel.motor.encoder.interrput();
     }
 }

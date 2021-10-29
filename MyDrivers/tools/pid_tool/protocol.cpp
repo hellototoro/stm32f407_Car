@@ -25,7 +25,7 @@
 
 /* 外部变量声明 */
 extern MyCar car;
-extern osSemaphoreId UartReceivedHandle;
+extern osSemaphoreId SemUartReceivedHandle;
 
 static uint8_t recv_buf[PROT_FRAME_RECV_MAX_LEN];
 static uint8_t recv_data[PROT_FRAME_RECV_MAX_LEN];
@@ -173,7 +173,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
             received_flag = 1;
             memcpy(recv_data, recv_buf, recv_buf[LEN_INDEX_VAL]);
             pid_tool_start_receive();
-            osSemaphoreRelease (UartReceivedHandle);
+            osSemaphoreRelease (SemUartReceivedHandle);
             return;
         }
         if (find_header(recv_buf)) {
@@ -186,7 +186,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
                 received_flag = 1;
                 memcpy(recv_data, recv_buf, receive_len);
                 pid_tool_start_receive();
-                osSemaphoreRelease (UartReceivedHandle);
+                osSemaphoreRelease (SemUartReceivedHandle);
             }
         } else {
             pid_tool_start_receive();

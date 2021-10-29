@@ -7,18 +7,15 @@
 #include "r61509/r61509.hpp"
 #include "display/display.hpp"
 #include "cmsis_os.h"
-#include "app_touchgfx.h"
+//#include "app_touchgfx.h"
 
 /* 外部变量声明 */
-extern osSemaphoreId UartReceivedHandle;
 
-
+/* 本地变量定义&声明 */
 MyCar car;
 MyDrivers::led led1(1);
 r61509 r61509;
 MyDrivers::display tft_display(&r61509);
-
-Encoder_HandleTypeDef *encoders[] = {LEFT_encoder, RIGHT_encoder};
 uint8_t display_buffer[20];
 
 /* PID相关变量 */
@@ -139,6 +136,8 @@ void led_task(void)
 
 /* FreeRTOS 任务入口函数（C接口函数） */
 extern "C" {
+extern void MX_TouchGFX_Process(void);
+
 void StartLEDTask(void const * argument)
 {
     for(;;)
@@ -178,10 +177,13 @@ void StartDisplayTask(void const * argument)
 
 void StartUartTask(void const * argument)
 {
+    osSemaphoreId semaphore = (osSemaphoreId) argument;
     for(;;)
     {
-        osSemaphoreWait (UartReceivedHandle, osWaitForever);
-        analysis_rec_data();
+        if (semaphore != NULL) {
+            osSemaphoreWait (semaphore, osWaitForever);
+            analysis_rec_data();
+        }
     }
 }
 
