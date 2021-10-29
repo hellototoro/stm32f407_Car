@@ -39,7 +39,7 @@ void MyCar::init(void)
                      ENCODER_HANDLE(RIGHT));
     left_wheel.PID_Init(5.0, 2.0, 0.0,  //速度环pid
                         0.0, 0.0, 0.0); //位置环pid
-    right_wheel.PID_Init(5.0, 2.0, 0.0, //速度环pid
+    right_wheel.PID_Init(5.0, 0.0013, 0.0, //速度环pid
                          0.0, 0.0, 0.0);//位置环pid
     HAL_TIM_Base_Start_IT(encoder_timer);
 }

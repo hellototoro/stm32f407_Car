@@ -49,7 +49,7 @@ void setup(void)
 
     car.init();
     car.power_on();
-    car.move_front(80.f);
+    //car.move_front(80.f);
 
     //turn the PID on
     //Setpoint_l = 80.f;
@@ -63,11 +63,11 @@ void setup(void)
 
     //debug
     set_computer_value(SEND_STOP_CMD, CURVES_CH1, NULL, 0);    // 同步上位机的启动按钮状态
-    //set_computer_value(SEND_STOP_CMD, CURVES_CH2, NULL, 0);    // 同步上位机的启动按钮状态
+    set_computer_value(SEND_STOP_CMD, CURVES_CH2, NULL, 0);    // 同步上位机的启动按钮状态
     int32_t temp = (int32_t)car.left_wheel.getTargetValue();
     set_computer_value(SEND_TARGET_CMD, CURVES_CH1, &temp, 1);     // 给通道 1 发送目标值
-    //set_computer_value(SEND_TARGET_CMD, CURVES_CH2, &temp, 1);     // 给通道 1 发送目标值
-    //pid_tool_start_receive();
+    set_computer_value(SEND_TARGET_CMD, CURVES_CH2, &temp, 1);     // 给通道 1 发送目标值
+    pid_tool_start_receive();
 }
 
 void loop(void)
@@ -183,13 +183,15 @@ void StartUartTask(void const * argument)
         if (semaphore != NULL) {
             osSemaphoreWait (semaphore, osWaitForever);
             analysis_rec_data();
+        } else {
+        	osDelay(100);
         }
     }
 }
 
 void StartGUITask(void const * argument)
 {
-    MX_TouchGFX_Process();
+    //MX_TouchGFX_Process();
     for(;;)
     {
         osDelay(10);

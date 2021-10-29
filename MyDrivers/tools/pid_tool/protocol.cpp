@@ -110,7 +110,12 @@ void analysis_rec_data(void)
                     d_temp = *(float *)&temp2;
                     
                     //set_p_i_d(recv_data[CHX_INDEX_VAL],p_temp, i_temp, d_temp);    // 设置 P I D
-                    set_p_i_d(&car.left_wheel.motor.speed_pid , p_temp, i_temp, d_temp);
+                    
+                    if (recv_data[CHX_INDEX_VAL] == CURVES_CH1) {
+                        set_p_i_d(&car.left_wheel.motor.speed_pid , p_temp, i_temp, d_temp);
+                    } else if (recv_data[CHX_INDEX_VAL] == CURVES_CH2) {
+                        set_p_i_d(&car.right_wheel.motor.speed_pid , p_temp, i_temp, d_temp);
+                    }
                 }
                 break;
 
@@ -118,7 +123,11 @@ void analysis_rec_data(void)
                 {
                     int actual_temp = COMPOUND_32BIT(&recv_data[13]);    // 得到数据
                     //set_pid_target(recv_data[CHX_INDEX_VAL],actual_temp);    // 设置目标值
-                    set_pid_target(&car.left_wheel.motor.speed_pid, actual_temp);
+                    if (recv_data[CHX_INDEX_VAL] == CURVES_CH1) {
+                        set_pid_target(&car.left_wheel.motor.speed_pid, actual_temp);
+                    } else if (recv_data[CHX_INDEX_VAL] == CURVES_CH2) {
+                        set_pid_target(&car.right_wheel.motor.speed_pid, actual_temp);
+                    }
                 }
                 break;
                 
