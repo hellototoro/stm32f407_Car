@@ -68,8 +68,8 @@ void setup(void)
     Motor_init();
     //Motor_move(FRONT);
     //turn the PID on
-    Setpoint_l = 80.f;
-    Setpoint_r = 80.f;
+    Setpoint_l = 50.f;
+    Setpoint_r = 50.f;
     Motor_PID_l.SetMode(AUTOMATIC);
     Motor_PID_r.SetMode(AUTOMATIC);
     Motor_PID_l.SetOutputLimits(0, 255);

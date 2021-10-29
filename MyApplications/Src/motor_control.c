@@ -13,6 +13,7 @@
 #define WHEEL_DIAMETER  0.048f      //轮子直径，单位：m
 #define PI              3.1415f     //Π
 #define WHEEL_CPR       1080.f      //每转计数
+#define ENCODE_RESOLUTION   ((PI*WHEEL_DIAMETER)/WHEEL_CPR)
 
 #define PWM_RESOLUTION  255.f
 
@@ -197,8 +198,8 @@ void Motor_encoderTask(void)
 
     calculate_rpm(TIM6_TICK_FREQ_DEFAULT, motor.left_encoder.delta_counter, &motor.left_wheel.current_rpm);
     calculate_rpm(TIM6_TICK_FREQ_DEFAULT, motor.right_encoder.delta_counter, &motor.right_wheel.current_rpm);
-    motor.left_wheel.mileage += motor.left_encoder.delta_counter;   /* 累计里程 */
-    motor.right_wheel.mileage += motor.right_encoder.delta_counter; /* 累计里程 */
+    motor.left_wheel.mileage += motor.left_encoder.delta_counter * ENCODE_RESOLUTION;   /* 累计里程 */
+    motor.right_wheel.mileage += motor.right_encoder.delta_counter * ENCODE_RESOLUTION; /* 累计里程 */
 
     motor.left_encoder.last_counter = counter_l;
     motor.right_encoder.last_counter = counter_r;
