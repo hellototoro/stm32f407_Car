@@ -17,10 +17,15 @@
 #include <string.h>
 #include "tools/pid_tool/protocol.h"
 #include "mainpp.hpp"
-#include "motor_control.h"
-#include "PID/PID_v1.h"
+#include "MyCar.hpp"
+//#include "motor_control.h"
+//#include "PID/PID_v1.h"
+#include "PID/fire_pid.h"
+#include "cmsis_os.h"
 
-extern PID Motor_PID_l,Motor_PID_r;
+/* 外部变量声明 */
+extern MyCar car;
+extern osSemaphoreId SemUartReceivedHandle;
 
 static uint8_t recv_buf[PROT_FRAME_RECV_MAX_LEN];
 static uint8_t recv_data[PROT_FRAME_RECV_MAX_LEN];
@@ -104,26 +109,39 @@ void analysis_rec_data(void)
                     i_temp = *(float *)&temp1;
                     d_temp = *(float *)&temp2;
                     
-                    set_p_i_d(recv_data[CHX_INDEX_VAL],p_temp, i_temp, d_temp);    // 设置 P I D
+                    //set_p_i_d(recv_data[CHX_INDEX_VAL],p_temp, i_temp, d_temp);    // 设置 P I D
+                    
+                    if (recv_data[CHX_INDEX_VAL] == CURVES_CH1) {
+                        set_p_i_d(&car.left_wheel.motor.speed_pid , p_temp, i_temp, d_temp);
+                    } else if (recv_data[CHX_INDEX_VAL] == CURVES_CH2) {
+                        set_p_i_d(&car.right_wheel.motor.speed_pid , p_temp, i_temp, d_temp);
+                    }
                 }
                 break;
 
                 case SET_TARGET_CMD:
                 {
                     int actual_temp = COMPOUND_32BIT(&recv_data[13]);    // 得到数据
-                    set_pid_target(recv_data[CHX_INDEX_VAL],actual_temp);    // 设置目标值
+                    //set_pid_target(recv_data[CHX_INDEX_VAL],actual_temp);    // 设置目标值
+                    if (recv_data[CHX_INDEX_VAL] == CURVES_CH1) {
+                        set_pid_target(&car.left_wheel.motor.speed_pid, actual_temp);
+                    } else if (recv_data[CHX_INDEX_VAL] == CURVES_CH2) {
+                        set_pid_target(&car.right_wheel.motor.speed_pid, actual_temp);
+                    }
                 }
                 break;
                 
                 case START_CMD:
                 {
-                    Motor_move(FRONT);              // 启动电机
+                    //Motor_move(FRONT);              // 启动电机
+                    car.move_front(80.f);
                 }
                 break;
                 
                 case STOP_CMD:
                 {
-                    Motor_move(STOP);              // 停止电机
+                    //Motor_move(STOP);              // 停止电机
+                    car.stop();
                 }
                 break;
                 
@@ -135,8 +153,8 @@ void analysis_rec_data(void)
                 
                 case SET_PERIOD_CMD:
                 {
-                    uint32_t temp = COMPOUND_32BIT(&recv_data[13]);     // 周期数
-                    set_period(recv_data[CHX_INDEX_VAL],temp);
+                    //uint32_t temp = COMPOUND_32BIT(&recv_data[13]);     // 周期数
+                    //set_period(recv_data[CHX_INDEX_VAL],temp);
                 }
                 break;
 
@@ -164,6 +182,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
             received_flag = 1;
             memcpy(recv_data, recv_buf, recv_buf[LEN_INDEX_VAL]);
             pid_tool_start_receive();
+            osSemaphoreRelease (SemUartReceivedHandle);
             return;
         }
         if (find_header(recv_buf)) {
@@ -176,6 +195,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
                 received_flag = 1;
                 memcpy(recv_data, recv_buf, receive_len);
                 pid_tool_start_receive();
+                osSemaphoreRelease (SemUartReceivedHandle);
             }
         } else {
             pid_tool_start_receive();
@@ -188,7 +208,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 /* 串口回调函数 */
 
 /* pid debug */
-void set_p_i_d(uint8_t ch,float p_temp, float i_temp, float d_temp)
+/*void set_p_i_d(uint8_t ch,float p_temp, float i_temp, float d_temp)
 {
     if (ch == CURVES_CH1)
         Motor_PID_l.SetTunings(p_temp, i_temp, d_temp);
@@ -210,6 +230,6 @@ void set_period(uint8_t ch,uint32_t period)
         Motor_PID_l.SetSampleTime(period);
     else
         Motor_PID_r.SetSampleTime(period);
-}
+}*/
 
 /**********************************************************************************************/

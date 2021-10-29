@@ -16,6 +16,11 @@ public:
     #define P_ON_M      0
     #define P_ON_E      1
 
+    //add by HuangJian
+    PID() {}
+    void init(double*, double*, double*,    // * constructor.  links the PID to the Input, Output, and 
+              double, double, double, int); //   Setpoint.  Initial tuning parameters are also set here
+
     //commonly used functions **************************************************************************
     PID(double*, double*, double*,          // * constructor.  links the PID to the Input, Output, and 
         double, double, double, int, int);  //   Setpoint.  Initial tuning parameters are also set here.

@@ -85,8 +85,8 @@ typedef struct
 extern void set_computer_value(uint8_t cmd, uint8_t ch, void *data, uint8_t num);
 extern void pid_tool_start_receive(void);
 extern void analysis_rec_data(void);
-extern void set_p_i_d(uint8_t ch,float p_temp, float i_temp, float d_temp);
-extern void set_pid_target(uint8_t ch,float temp_val);
+//extern void set_p_i_d(uint8_t ch,float p_temp, float i_temp, float d_temp);
+//extern void set_pid_target(uint8_t ch,float temp_val);
 extern void set_period(uint8_t ch,uint32_t period);
 
 #ifdef __cplusplus
