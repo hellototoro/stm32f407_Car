@@ -71,8 +71,8 @@ public:
         return target_value;
     }
 
-    void loopTask(uint16_t period) {
-        motor.loopTask(period, mileage, ratio());
+    static void period_interrput(MyWheel &wheel, uint16_t period) {
+        wheel.motor.period_interrput(wheel.motor, period, wheel.mileage, ratio());
     }
     
     virtual ~MyWheel() {}

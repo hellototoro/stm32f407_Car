@@ -24,9 +24,9 @@ void hw_encoder::stop(void)
     HAL_TIM_Encoder_Stop_IT(Encoder_Handle, TIM_CHANNEL_ALL);
 }
 
-void hw_encoder::interrput(void)
+void hw_encoder::interrput(hw_encoder &encoder)
 {
-    (__HAL_TIM_IS_TIM_COUNTING_DOWN(Encoder_Handle) == true) ? overflow-- : overflow++;
+    (__HAL_TIM_IS_TIM_COUNTING_DOWN(encoder.Encoder_Handle) == true) ? encoder.overflow-- : encoder.overflow++;
 }
 
 } /* namespace MyDrivers */

@@ -84,38 +84,38 @@ double motor::getRPM(void)
   *         from 0 to 255
   * @retval None
   */
-void motor::setDutyCycle(uint16_t D)
+void motor::setDutyCycle(motor &_motor, uint16_t D)
 {
     uint32_t P;    /* Pulse duration */
     uint32_t T;    /* PWM signal period */
 
     /* PWM signal period is determined by the value of the auto-reload register */
-    T = __HAL_TIM_GET_AUTORELOAD(motor_PWM_Handle) + 1;
+    T = __HAL_TIM_GET_AUTORELOAD(_motor.motor_PWM_Handle) + 1;
 
     /* Pulse duration is determined by the value of the compare register.       */
     /* Its value is calculated in order to match the requested duty cycle.      */
     P = (D*T)/pwm_resolution;
-    __HAL_TIM_SET_COMPARE(motor_PWM_Handle, PWM_Channel, P);
+    __HAL_TIM_SET_COMPARE(_motor.motor_PWM_Handle, _motor.PWM_Channel, P);
 }
 
-void motor::loopTask(uint16_t period, double &mileage, double mileage_ratio)
+void motor::period_interrput(motor &_motor, uint16_t period, double &mileage, double mileage_ratio)
 {
-    encoder.sum_counter = encoder.getEncoderCounter() + (encoder.overflow * encoder.getPeriod());
+    _motor.encoder.sum_counter = _motor.encoder.getEncoderCounter() + (_motor.encoder.overflow * _motor.encoder.getPeriod());
 
-    encoder.delta_counter = encoder.sum_counter - encoder.last_counter;
+    _motor.encoder.delta_counter = _motor.encoder.sum_counter - _motor.encoder.last_counter;
 
-    real_time_rpm = encoder.delta_counter * ratio(period);//(encoder.delta_counter * 1000 * 60.f) / (encoder.resolution(4) * (double)period);//转/分钟
+    _motor.real_time_rpm = _motor.encoder.delta_counter * ratio(period);//(encoder.delta_counter * 1000 * 60.f) / (encoder.resolution(4) * (double)period);//转/分钟
 
     //encoder.sum_counter += encoder.delta_counter;
-    mileage += encoder.delta_counter * mileage_ratio;
+    mileage += _motor.encoder.delta_counter * mileage_ratio;
 
-    encoder.last_counter = encoder.sum_counter;
+    _motor.encoder.last_counter = _motor.encoder.sum_counter;
 
-    if (location_pid_tag) {
-        setDutyCycle(location_pid_realize(&location_pid, abs(encoder.sum_counter)));
+    if (_motor.location_pid_tag) {
+        setDutyCycle(_motor, location_pid_realize(&_motor.location_pid, abs(_motor.encoder.sum_counter)));
     }
-    if (speed_pid_tag) {
-        setDutyCycle(speed_pid_realize(&speed_pid, abs(real_time_rpm)));
+    if (_motor.speed_pid_tag) {
+        setDutyCycle(_motor, speed_pid_realize(&_motor.speed_pid, abs(_motor.real_time_rpm)));
     }
 }
 

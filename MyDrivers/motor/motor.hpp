@@ -40,14 +40,14 @@ public:
     void setLocation(int32_t counter);
     void setSpeed(double speed);
     double getRPM(void);
-    void loopTask(uint16_t period, double &mileage, double ratio);
+    static void period_interrput(motor &_motor, uint16_t period, double &mileage, double mileage_ratio);
     virtual ~motor() {}
 
 private:
     double real_time_rpm;               /* 当前轮子转速：单位：转/秒 */
     constexpr static uint8_t pwm_resolution = 255;
-    constexpr double ratio(uint16_t period) {
-        return (1000 * 60.f) / (encoder.resolution(4) * period);
+    constexpr static double ratio(uint16_t period) {
+        return (1000 * 60.f) / (hw_encoder::resolution(4) * period);
     }
 
     GPIO_TypeDef *motor_port_p, *motor_port_n;
@@ -58,7 +58,7 @@ private:
     bool location_pid_tag;
     bool speed_pid_tag;
 private:
-    void setDutyCycle(uint16_t D);
+    static void setDutyCycle(motor &_motor, uint16_t D);
 
 };
 

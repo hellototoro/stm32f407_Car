@@ -41,7 +41,7 @@ public:
     uint32_t getPeriod(void) {
         return (__HAL_TIM_GET_AUTORELOAD(Encoder_Handle) + 1);
     }
-    void interrput(void);
+    static void interrput(hw_encoder &encoder);
 
     virtual ~hw_encoder() {}
 };

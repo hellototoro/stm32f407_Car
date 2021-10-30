@@ -107,12 +107,12 @@ void MyCar::stop(void)
 void MyCar::timeout_interrput(TIM_HandleTypeDef *htim)
 {
     if (htim == encoder_timer) {/* @ ENCODER_TICK_FREQ_DEFAULT ms定时器 */
-        left_wheel.loopTask(ENCODER_TICK_FREQ_DEFAULT);
-        right_wheel.loopTask(ENCODER_TICK_FREQ_DEFAULT);
+        MyWheel::period_interrput(left_wheel, ENCODER_TICK_FREQ_DEFAULT);
+        MyWheel::period_interrput(right_wheel, ENCODER_TICK_FREQ_DEFAULT);
     } else if (htim == ENCODER_HANDLE(LEFT)) {
-        left_wheel.motor.encoder.interrput();
+        MyDrivers::hw_encoder::interrput(left_wheel.motor.encoder);
     } else if (htim == ENCODER_HANDLE(RIGHT)) {
-        right_wheel.motor.encoder.interrput();
+        MyDrivers::hw_encoder::interrput(right_wheel.motor.encoder);
     }
 }
 
