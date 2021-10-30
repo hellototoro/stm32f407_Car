@@ -8,19 +8,19 @@
 #ifndef COMPONENTS_FT5316_FT5316_HPP_
 #define COMPONENTS_FT5316_FT5316_HPP_
 
-#include "hw_iic/hw_iic.hpp"
+#include "hw_i2c/HW_I2C.hpp"
 
 
 
-class ft5316 {
+class Ft5316 {
 public:
-    ft5316(I2C_HandleTypeDef *_touchPad_IIC_Handle);
+    Ft5316(I2C_HandleTypeDef *_touchPad_IIC_Handle);
     bool init(void);
     void readData(uint16_t &x, uint16_t &y);
-    virtual ~ft5316();
+    virtual ~Ft5316();
 private:
     I2C_HandleTypeDef *touchPad_IIC_Handle;
-    MyDrivers::hw_iic ft5316_iic;
+    MyDrivers::HW_I2C ft5316_iic;
     //touchDataDef touchData;
 };
 

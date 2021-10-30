@@ -1,11 +1,11 @@
+#include <display/Display.hpp>
+#include <led/Led.hpp>
+#include <r61509/R61509.hpp>
 #include <stdio.h>
 #include "mainpp.hpp"
-#include "led/led.hpp"
 #include "MyCar.hpp"
 //#include "PID/PID_v1.h"
 #include "tools/pid_tool/protocol.h"
-#include "r61509/r61509.hpp"
-#include "display/display.hpp"
 #include "cmsis_os.h"
 //#include "app_touchgfx.h"
 
@@ -13,9 +13,9 @@
 
 /* 本地变量定义&声明 */
 MyCar car;
-MyDrivers::led led1(1);
-r61509 r61509;
-MyDrivers::display tft_display(&r61509);
+MyDrivers::Led led1(1);
+R61509 r61509;
+MyDrivers::Display display(&r61509);
 uint8_t display_buffer[20];
 
 /* PID相关变量 */
@@ -42,9 +42,9 @@ void TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 
 void setup(void)
 {
-    tft_display.init();
-    tft_display.setCharSize(24);
-    tft_display.clear(MyDrivers::lcd_color::WHITE);
+    display.init();
+    display.setCharSize(24);
+    display.clear(MyDrivers::lcd_color::WHITE);
     display_fram();
 
     car.init();
@@ -75,26 +75,26 @@ void loop(void)
     /*int32_t temp;
     Input_l = getSpeed_RPM(wheel_left);
     sprintf((char*)display_buffer, "%.02f", Input_l);
-    tft_display.showString(110, 10, (char*)display_buffer);
+    display.showString(110, 10, (char*)display_buffer);
     temp = (int32_t)Input_l;
     set_computer_value(SEND_FACT_CMD, CURVES_CH1, &temp, 1);
 
     Input_r = getSpeed_RPM(wheel_right);
     sprintf((char*)display_buffer, "%.02f", Input_r);
-    tft_display.showString(110, 40, (char*)display_buffer);
+    display.showString(110, 40, (char*)display_buffer);
     temp = (int32_t)Input_r;
     set_computer_value(SEND_FACT_CMD, CURVES_CH2, &temp, 1);
 
     if (Motor_PID_l.Compute() == true) {
         Motor_PID_Input(wheel_left, Output_l);
         sprintf((char*)display_buffer, "%.02f", Output_l);
-        tft_display.showString(120, 70, (char*)display_buffer);
+        display.showString(120, 70, (char*)display_buffer);
     }
 
     if (Motor_PID_r.Compute() == true) {
         Motor_PID_Input(wheel_right, Output_r);
         sprintf((char*)display_buffer, "%.02f", Output_r);
-        tft_display.showString(120, 100, (char*)display_buffer);
+        display.showString(120, 100, (char*)display_buffer);
     }*/
     /* 接收数据处理 */
     //debug
@@ -103,7 +103,7 @@ void loop(void)
 
     int32_t temp;
     sprintf((char*)display_buffer, "%.02f", car.left_wheel.getSpeed_RPM());
-    tft_display.showString(110, 10, (char*)display_buffer);
+    display.showString(110, 10, (char*)display_buffer);
     temp = (int32_t)car.left_wheel.motor.getRPM();
     set_computer_value(SEND_FACT_CMD, CURVES_CH1, &temp, 1);
     led_task();
@@ -113,10 +113,10 @@ void loop(void)
 
 void display_fram(void)
 {
-    tft_display.showString(10, 10, (char*)"Input_l:");
-    tft_display.showString(10, 40, (char*)"Input_r:");
-    tft_display.showString(10, 70, (char*)"Output_l:");
-    tft_display.showString(10, 100, (char*)"Output_r:");
+    display.showString(10, 10, (char*)"Input_l:");
+    display.showString(10, 40, (char*)"Input_r:");
+    display.showString(10, 70, (char*)"Output_l:");
+    display.showString(10, 100, (char*)"Output_r:");
 }
 
 void set_target_speed(Motor_WheelType wheel, double speed)
@@ -153,6 +153,7 @@ void StartCarTask(void const * argument)
     {
         //car.left_wheel.loopTask(50);
         //car.right_wheel.loopTask(50);
+        //car.move_front(0,1.0);
         osDelay(1000);
     }
 }
@@ -163,12 +164,12 @@ void StartDisplayTask(void const * argument)
     for(;;)
     {
         sprintf((char*)display_buffer, "%.02f", car.left_wheel.getSpeed_RPM());
-        tft_display.showString(110, 10, (char*)display_buffer);
+        display.showString(110, 10, (char*)display_buffer);
         temp = (int32_t)car.left_wheel.motor.getRPM();
         set_computer_value(SEND_FACT_CMD, CURVES_CH1, &temp, 1);
 
         sprintf((char*)display_buffer, "%.02f", car.right_wheel.getSpeed_RPM());
-        tft_display.showString(110, 40, (char*)display_buffer);
+        display.showString(110, 40, (char*)display_buffer);
         temp = (int32_t)car.right_wheel.getSpeed_RPM();
         set_computer_value(SEND_FACT_CMD, CURVES_CH2, &temp, 1);
         osDelay(100);
@@ -184,7 +185,7 @@ void StartUartTask(void const * argument)
             osSemaphoreWait (semaphore, osWaitForever);
             analysis_rec_data();
         } else {
-        	osDelay(100);
+            osDelay(100);
         }
     }
 }

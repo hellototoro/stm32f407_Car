@@ -10,7 +10,7 @@
 #define _OLED_HPP_
 
 #include <sw_i2c/Inc/stm32_iic.hpp>
-#include "hw_iic/hw_iic.hpp"
+#include "hw_i2c/HW_I2C.hpp"
 
 
 class oled 

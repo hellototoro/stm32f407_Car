@@ -7,6 +7,7 @@
 
 #include "MyCar.hpp"
 
+using namespace MyDrivers;
 
 #define MOTOR_PORT(dir,polarity)    dir##_MOTOR_##polarity##_GPIO_Port  //dir: @ LEFT RIGHT FRONT BACK
                                                                         //polarity: @ P N
@@ -107,12 +108,12 @@ void MyCar::stop(void)
 void MyCar::timeout_interrput(TIM_HandleTypeDef *htim)
 {
     if (htim == encoder_timer) {/* @ ENCODER_TICK_FREQ_DEFAULT ms定时器 */
-        MyWheel::period_interrput(left_wheel, ENCODER_TICK_FREQ_DEFAULT);
-        MyWheel::period_interrput(right_wheel, ENCODER_TICK_FREQ_DEFAULT);
+        Motor::period_interrput(left_wheel.motor, ENCODER_TICK_FREQ_DEFAULT, left_wheel.mileage, left_wheel.ratio(4));
+        Motor::period_interrput(right_wheel.motor, ENCODER_TICK_FREQ_DEFAULT, right_wheel.mileage, right_wheel.ratio(4));
     } else if (htim == ENCODER_HANDLE(LEFT)) {
-        MyDrivers::hw_encoder::interrput(left_wheel.motor.encoder);
+        HW_Encoder::interrput(left_wheel.motor.encoder);
     } else if (htim == ENCODER_HANDLE(RIGHT)) {
-        MyDrivers::hw_encoder::interrput(right_wheel.motor.encoder);
+        HW_Encoder::interrput(right_wheel.motor.encoder);
     }
 }
 

@@ -5,26 +5,26 @@
  *      Author: huang
  */
 
-#include "encoder/hw_encoder.hpp"
+#include <encoder/HW_Encoder.hpp>
 
 namespace MyDrivers {
 
-void hw_encoder::init(Encoder_HandleTypeDef *Encoder_Handle)
+void HW_Encoder::init(Encoder_HandleTypeDef *Encoder_Handle)
 {
     this->Encoder_Handle = Encoder_Handle;
 }
 
-void hw_encoder::start(void)
+void HW_Encoder::start(void)
 {
     HAL_TIM_Encoder_Start_IT(Encoder_Handle, TIM_CHANNEL_ALL);
 }
 
-void hw_encoder::stop(void)
+void HW_Encoder::stop(void)
 {
     HAL_TIM_Encoder_Stop_IT(Encoder_Handle, TIM_CHANNEL_ALL);
 }
 
-void hw_encoder::interrput(hw_encoder &encoder)
+void HW_Encoder::interrput(HW_Encoder &encoder)
 {
     (__HAL_TIM_IS_TIM_COUNTING_DOWN(encoder.Encoder_Handle) == true) ? encoder.overflow-- : encoder.overflow++;
 }

@@ -8,13 +8,13 @@
 #ifndef COMPONENTS_ULTRASONIC_ULTRASONIC_HPP_
 #define COMPONENTS_ULTRASONIC_ULTRASONIC_HPP_
 
-class ultrasonic {
+class Ultrasonic {
 public:
-	ultrasonic();
+	Ultrasonic();
 	void init();
 	int getDistance(void);
 	void ultrasonic_time_isr(void);
-	virtual ~ultrasonic();
+	virtual ~Ultrasonic();
 
 private:
 	int distance;

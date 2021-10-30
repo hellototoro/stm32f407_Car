@@ -1,7 +1,7 @@
 #ifndef __OV2640_HPP
 #define __OV2640_HPP
 
-#include "hw_iic/hw_iic.hpp"
+#include "hw_i2c/HW_I2C.hpp"
 
 class ov2640 {
 public:

@@ -8,9 +8,9 @@
 #ifndef MYDRIVERS_TFTLCD_TFTLCD_HPP_
 #define MYDRIVERS_TFTLCD_TFTLCD_HPP_
 
+#include <display/TFT_Lcd.hpp>
 #include "main.h"
 #include "display/Fonts/fonts.h"
-#include "display/tft_lcd.hpp"
 
 namespace MyDrivers {
 
@@ -55,9 +55,9 @@ enum class lcd_color {
     ORANGE        = 0xFD20
 };
 
-class display {
+class Display {
 public:
-    display(tft_lcd* panelType);
+    Display(TFT_Lcd* panelType);
     void init(void);
     //void setPanel(tft_lcd* panel);
     //tft_lcd* getPanel();
@@ -73,7 +73,7 @@ public:
     void displayChar(uint16_t Xpos, uint16_t Ypos, uint8_t Ascii);
     uint32_t power(uint8_t m,uint8_t n);
     uint32_t getDisplayAddress();
-    ~display();
+    ~Display();
 
 private:
     class _DrawProp {
@@ -89,7 +89,7 @@ private:
     };
     uint8_t charSize;
     uint8_t charMode;
-    tft_lcd *tft_panel;
+    TFT_Lcd *tft_panel;
 };
 
 } /* namespace MyDrivers */

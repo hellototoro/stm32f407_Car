@@ -5,15 +5,15 @@
  *      Author: huang
  */
 
-#include "r61509/r61509.hpp"
+#include <r61509/R61509.hpp>
 
-r61509::r61509() {
+R61509::R61509() {
     // TODO Auto-generated constructor stub
     dir = MyDrivers::displayDir::vertical;
     //mode = MyDrivers::scanMode::R2L_D2U;
 }
 
-r61509::~r61509() {
+R61509::~R61509() {
     // TODO Auto-generated destructor stub
 }
 
@@ -22,7 +22,7 @@ r61509::~r61509() {
   * @param  None
   * @retval None
   */
-void r61509::displayOn(void)
+void R61509::displayOn(void)
 {
     LCD_IO_WriteReg(0x0029);
 }
@@ -32,7 +32,7 @@ void r61509::displayOn(void)
   * @param  None
   * @retval None
   */
-void r61509::displayOff(void)
+void R61509::displayOff(void)
 {
     LCD_IO_WriteReg(0x0011);
 }
@@ -42,7 +42,7 @@ void r61509::displayOff(void)
   * @param  None
   * @retval None
   */
-void r61509::prepareWrite(void)
+void R61509::prepareWrite(void)
 {
     LCD_IO_WriteReg(R34);
 }
@@ -52,7 +52,7 @@ void r61509::prepareWrite(void)
   * @param  None
   * @retval The Lcd Pixel Width
   */
-uint16_t r61509::getPixelWidth(void)
+uint16_t R61509::getPixelWidth(void)
 {
  return width;
 }
@@ -62,12 +62,12 @@ uint16_t r61509::getPixelWidth(void)
   * @param  None
   * @retval The Lcd Pixel Height
   */
-uint16_t r61509::getPixelHeight(void)
+uint16_t R61509::getPixelHeight(void)
 {
  return height;
 }
 
-uint32_t r61509::getRamAddress(void)
+uint32_t R61509::getRamAddress(void)
 {
     return readRamAddress();
 }
@@ -77,12 +77,12 @@ uint32_t r61509::getRamAddress(void)
   * @param  None
   * @retval The s6d04d1 ID 
   */
-void r61509::readID(void)
+void R61509::readID(void)
 {
     id = LCD_IO_ReadData(0X0000);
 }
 
-uint16_t r61509::getID(void)
+uint16_t R61509::getID(void)
 {
     return id;
 }
@@ -93,7 +93,7 @@ uint16_t r61509::getID(void)
   * @param  Ypos: specifies the Y position.
   * @retval None
   */
-void r61509::setCursor(uint16_t Xpos,uint16_t Ypos)
+void R61509::setCursor(uint16_t Xpos,uint16_t Ypos)
 {
     if (dir == MyDrivers::displayDir::horizontal)
         Xpos = width - 1 -Xpos;//横屏其实就是调转x,y坐标
@@ -109,7 +109,7 @@ void r61509::setCursor(uint16_t Xpos,uint16_t Ypos)
   * @param  LCDRegValue: Value to write to the selected register.
   * @retval None
   */
-void r61509::writeReg(uint8_t LCDReg, uint16_t LCDRegValue)
+void R61509::writeReg(uint8_t LCDReg, uint16_t LCDRegValue)
 {
   LCD_IO_WriteReg(LCDReg);
   
@@ -122,7 +122,7 @@ void r61509::writeReg(uint8_t LCDReg, uint16_t LCDRegValue)
   * @param  LCDReg: address of the selected register.
   * @retval LCD Register Value.
   */
-uint16_t r61509::readReg(uint8_t LCDReg)
+uint16_t R61509::readReg(uint8_t LCDReg)
 { 
   /* Read 16-bit Reg */
   return (LCD_IO_ReadData(LCDReg));
@@ -136,7 +136,7 @@ uint16_t r61509::readReg(uint8_t LCDReg)
   * @param  Width:  display window width.
   * @retval None
   */
-void r61509::setDisplayWindow(uint16_t Xpos,uint16_t Ypos,uint16_t width,uint16_t height)
+void R61509::setDisplayWindow(uint16_t Xpos,uint16_t Ypos,uint16_t width,uint16_t height)
 {
     uint16_t hsaval,heaval,vsaval,veaval;
     width = Xpos + width - 1;
@@ -172,7 +172,7 @@ void r61509::setDisplayWindow(uint16_t Xpos,uint16_t Ypos,uint16_t width,uint16_
   * @param  scanMode:   扫描模式见此枚举变量.
   * @retval None
   */
-void r61509::setScanMode(MyDrivers::displayDir _displayDir)
+void R61509::setScanMode(MyDrivers::displayDir _displayDir)
 {
     switch (_displayDir)
     {
@@ -198,7 +198,7 @@ void r61509::setScanMode(MyDrivers::displayDir _displayDir)
   * @param  displayDir:   显示方向：横屏和竖屏
   * @retval None
   */
-void r61509::setDisplayDir(MyDrivers::displayDir _displayDir)
+void R61509::setDisplayDir(MyDrivers::displayDir _displayDir)
 {
     dir = _displayDir;
     switch (dir)
@@ -229,7 +229,7 @@ void r61509::setDisplayDir(MyDrivers::displayDir _displayDir)
   * @param  RGBCode: the RGB pixel color
   * @retval None
   */
-void r61509::writePixel(uint16_t Xpos, uint16_t Ypos, uint16_t RGBCode)
+void R61509::writePixel(uint16_t Xpos, uint16_t Ypos, uint16_t RGBCode)
 {
   /* Set Cursor */
   setCursor(Xpos, Ypos);
@@ -246,7 +246,7 @@ void r61509::writePixel(uint16_t Xpos, uint16_t Ypos, uint16_t RGBCode)
   * @param  None
   * @retval The RGB pixel color
   */
-uint16_t r61509::readPixel(uint16_t Xpos, uint16_t Ypos)
+uint16_t R61509::readPixel(uint16_t Xpos, uint16_t Ypos)
 {
     /* Set Cursor */
     setCursor(Xpos, Ypos);
@@ -265,7 +265,7 @@ uint16_t r61509::readPixel(uint16_t Xpos, uint16_t Ypos)
   * @param  Length:   specifies the Line length.  
   * @retval None
   */
-void r61509::drawHLine(uint16_t RGBCode, uint16_t Xpos, uint16_t Ypos, uint16_t Length)
+void R61509::drawHLine(uint16_t RGBCode, uint16_t Xpos, uint16_t Ypos, uint16_t Length)
 {
     uint16_t counter = 0;
 
@@ -290,7 +290,7 @@ void r61509::drawHLine(uint16_t RGBCode, uint16_t Xpos, uint16_t Ypos, uint16_t 
   * @param  Length:   specifies the Line length.  
   * @retval None
   */
-void r61509::drawVLine(uint16_t RGBCode, uint16_t Xpos, uint16_t Ypos, uint16_t Length)
+void R61509::drawVLine(uint16_t RGBCode, uint16_t Xpos, uint16_t Ypos, uint16_t Length)
 {
   uint16_t counter = 0;
 
@@ -320,7 +320,7 @@ void r61509::drawVLine(uint16_t RGBCode, uint16_t Xpos, uint16_t Ypos, uint16_t 
 //画线
 // startXpos, startYpos:起点坐标
 // endXpos, endYpos:终点坐标  
-void r61509::drawLine(uint16_t RGBCode, uint16_t startXpos, uint16_t startYpos, uint16_t endXpos, uint16_t endYpos)
+void R61509::drawLine(uint16_t RGBCode, uint16_t startXpos, uint16_t startYpos, uint16_t endXpos, uint16_t endYpos)
 {
     int xerr = 0, yerr = 0, distance; 
     int incx, incy; 
@@ -373,7 +373,7 @@ void r61509::drawLine(uint16_t RGBCode, uint16_t startXpos, uint16_t startYpos, 
   * @param  Ypos: Bmp Y position in the LCD    
   * @retval None
   */
-void r61509::drawBitmap(uint16_t Xpos, uint16_t Ypos, uint8_t *pbmp)
+void R61509::drawBitmap(uint16_t Xpos, uint16_t Ypos, uint8_t *pbmp)
 {
     uint32_t index = 0, size = 0;
     /* Read bitmap size */
@@ -412,7 +412,7 @@ void r61509::drawBitmap(uint16_t Xpos, uint16_t Ypos, uint8_t *pbmp)
   * @param  Ysize: Image Y size in the LCD
   * @retval None
   */
-void r61509::drawRGBImage(uint16_t Xpos, uint16_t Ypos, uint16_t Xsize, uint16_t Ysize, uint8_t *pdata)
+void R61509::drawRGBImage(uint16_t Xpos, uint16_t Ypos, uint16_t Xsize, uint16_t Ysize, uint8_t *pdata)
 {
   uint32_t size = 0;
 
@@ -598,7 +598,7 @@ void LCD_ShowPicture2(uint16_t x, uint16_t y, uint16_t wide, uint16_t high,uint1
 }
 */
 
-void r61509::init(void)
+void R61509::init(void)
 {
     LCD_Delay(100);
     readID();

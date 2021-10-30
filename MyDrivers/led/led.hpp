@@ -13,19 +13,19 @@
 namespace MyDrivers {
 
 enum class led_number {
-	number1 = 1,
-	number2
+    number1 = 1,
+    number2
 };
 
-class led {
+class Led {
 public:
-	led(int _number);
-	void on(void);
-	void off(void);
-	void toggle(void);
+    Led(int _number);
+    void on(void);
+    void off(void);
+    void toggle(void);
 private:
-	void switch_led(bool_switch _switch);
-	int number;
+    void switch_led(bool_switch _switch);
+    int number;
 };
 }
 

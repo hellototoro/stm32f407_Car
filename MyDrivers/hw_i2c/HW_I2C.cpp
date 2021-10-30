@@ -5,24 +5,24 @@
  *      Author: huang
  */
 
-#include <hw_iic/hw_iic.hpp>
+#include <hw_i2c/HW_I2C.hpp>
 
 namespace MyDrivers {
 
 #define I2C_TIMEOUT  1000 /*<! Value of Timeout when I2C communication fails */
 
-hw_iic::hw_iic() {
+HW_I2C::HW_I2C() {
     // TODO Auto-generated constructor stub
 
 }
 
-void hw_iic::init(I2C_HandleTypeDef *IIC_Handle,uint8_t deviceAddress)
+void HW_I2C::init(I2C_HandleTypeDef *IIC_Handle,uint8_t deviceAddress)
 {
     this->IIC_Handle = IIC_Handle;
     this->deviceAddress = deviceAddress;
 }
 
-void hw_iic::error(void)
+void HW_I2C::error(void)
 {
     /* De-initialize the IOE comunication BUS */
     //HAL_I2C_DeInit(I2C_Handle);
@@ -33,7 +33,7 @@ void hw_iic::error(void)
     HAL_I2C_Init(IIC_Handle);
 }
 
-uint8_t hw_iic::readByte(uint8_t regAddress)
+uint8_t HW_I2C::readByte(uint8_t regAddress)
 {
     HAL_StatusTypeDef status = HAL_OK;
     uint8_t Value = 0;
@@ -50,7 +50,7 @@ uint8_t hw_iic::readByte(uint8_t regAddress)
     return Value;
 }
 
-bool hw_iic::readBytes(uint8_t regAddress, uint8_t *pData, uint16_t size)
+bool HW_I2C::readBytes(uint8_t regAddress, uint8_t *pData, uint16_t size)
 {
     HAL_StatusTypeDef status = HAL_OK;
 
@@ -66,7 +66,7 @@ bool hw_iic::readBytes(uint8_t regAddress, uint8_t *pData, uint16_t size)
     return static_cast<bool>(status);
 }
 
-bool hw_iic::writeByte(uint8_t regAddress, uint8_t data)
+bool HW_I2C::writeByte(uint8_t regAddress, uint8_t data)
 {
     HAL_StatusTypeDef status = HAL_OK;
 
@@ -82,7 +82,7 @@ bool hw_iic::writeByte(uint8_t regAddress, uint8_t data)
     return static_cast<bool>(status);
 }
 
-bool hw_iic::writeBytes(uint8_t regAddress, uint8_t *pdata, uint16_t size)
+bool HW_I2C::writeBytes(uint8_t regAddress, uint8_t *pdata, uint16_t size)
 {
     HAL_StatusTypeDef status = HAL_OK;
 
@@ -106,7 +106,7 @@ bool hw_iic::writeBytes(uint8_t regAddress, uint8_t *pdata, uint16_t size)
  * @param timeout Optional read timeout in milliseconds (0 to disable, leave off to use default class value in I2Cdev::readTimeout)
  * @return Status of read operation (true = success)
  */
-int8_t hw_iic::readBit(uint8_t regAddr, uint8_t bitNum, uint8_t *data)
+int8_t HW_I2C::readBit(uint8_t regAddr, uint8_t bitNum, uint8_t *data)
 {
     uint8_t count = 0xff;
     uint8_t b = readByte(regAddr);
@@ -121,7 +121,7 @@ int8_t hw_iic::readBit(uint8_t regAddr, uint8_t bitNum, uint8_t *data)
  * @param value New bit value to write
  * @return Status of operation (true = success)
  */
-bool hw_iic::writeBit(uint8_t regAddr, uint8_t bitNum, uint8_t data)
+bool HW_I2C::writeBit(uint8_t regAddr, uint8_t bitNum, uint8_t data)
 {
     uint8_t b = readByte(regAddr);
     b = (data != 0) ? (b | (1 << bitNum)) : (b & ~(1 << bitNum));
@@ -137,7 +137,7 @@ bool hw_iic::writeBit(uint8_t regAddr, uint8_t bitNum, uint8_t data)
  * @return Status of read operation (true = success)
  */
 
-int8_t hw_iic::readBits(uint8_t regAddr, uint8_t bitStart, uint8_t length, uint8_t *data)
+int8_t HW_I2C::readBits(uint8_t regAddr, uint8_t bitStart, uint8_t length, uint8_t *data)
 {
     // 01101001 read byte
     // 76543210 bit numbers
@@ -167,7 +167,7 @@ int8_t hw_iic::readBits(uint8_t regAddr, uint8_t bitStart, uint8_t length, uint8
  * @param data Right-aligned value to write
  * @return Status of operation (true = success)
  */
-bool hw_iic::writeBits(uint8_t regAddr, uint8_t bitStart, uint8_t length, uint8_t data)
+bool HW_I2C::writeBits(uint8_t regAddr, uint8_t bitStart, uint8_t length, uint8_t data)
 {
     //      010 value to write
     // 76543210 bit numbers
@@ -195,7 +195,7 @@ bool hw_iic::writeBits(uint8_t regAddr, uint8_t bitStart, uint8_t length, uint8_
     }*/
 }
 
-hw_iic::~hw_iic() {
+HW_I2C::~HW_I2C() {
     // TODO Auto-generated destructor stub
 }
 

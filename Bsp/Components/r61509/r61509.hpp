@@ -8,14 +8,14 @@
 #ifndef COMPONENTS_R61509_R61509_HPP_
 #define COMPONENTS_R61509_R61509_HPP_
 
+#include <display/TFT_Lcd.hpp>
 #include "main.h"
 
 #include "board.h"
-#include "display/tft_lcd.hpp"
 
-class r61509 : public MyDrivers::tft_lcd {
+class R61509 : public MyDrivers::TFT_Lcd {
 public:
-    r61509();
+    R61509();
     virtual uint16_t getID(void);
     virtual void init(void);
     virtual void prepareWrite(void);
@@ -36,7 +36,7 @@ public:
 
     virtual void displayOn(void);
     virtual void displayOff(void);
-    virtual ~r61509();
+    virtual ~R61509();
 
 protected:
     void readID(void);

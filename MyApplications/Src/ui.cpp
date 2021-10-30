@@ -8,7 +8,7 @@
   */
 #include <Inc/ui.hpp>
 #include <TouchGFXHAL.hpp>
-#include <Components/ft5316/ft5316.hpp>
+#include <Components/ft5316/Ft5316.hpp>
 #include "camera/camera.hpp"
 #include <led/led.hpp>
 #include <Inc/calendar.hpp>
@@ -16,7 +16,7 @@
 #include "cmsis_os.h"
 #include "Components/sram/mcudev_stm32_f4xx_pro_sram.h"
 
-ft5316 touchPad(I2C_Handle);
+Ft5316 touchPad(I2C_Handle);
 MyApplications::calendar rtc_Calendar;
 MyDrivers::camera MyCamera(I2C_Handle, CAMERA_R320x240);
 MyDrivers::led led2(2);

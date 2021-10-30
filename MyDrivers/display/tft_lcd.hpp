@@ -29,9 +29,9 @@ enum class displayDir{
     horizontal
 };
 
-class tft_lcd {
+class TFT_Lcd {
 public:
-    virtual ~tft_lcd() {
+    virtual ~TFT_Lcd() {
 
     }
 

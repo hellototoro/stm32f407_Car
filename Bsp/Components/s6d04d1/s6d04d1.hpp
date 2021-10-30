@@ -11,7 +11,7 @@
 #include "main.h"
 
 #include "board.h"
-#include "display/tft_lcd.hpp"
+#include "display/TFT_Lcd.hpp"
 
 /*enum class scanMode{
     L2R_U2D = 0,    //从左到右,从上到下
@@ -30,9 +30,9 @@ enum class displayDir{
     horizontal
 };*/
 
-class s6d04d1 : public MyDrivers::tft_lcd {
+class S6d04d1 : public MyDrivers::TFT_Lcd {
 public:
-    s6d04d1();
+    S6d04d1();
     virtual uint16_t getID(void);
     virtual void init(void);
     virtual void prepareWrite(void);
@@ -54,7 +54,7 @@ public:
     virtual void displayOn(void);
     virtual void displayOff(void);
 
-    virtual ~s6d04d1();
+    virtual ~S6d04d1();
 
 protected:
     void readID(void);

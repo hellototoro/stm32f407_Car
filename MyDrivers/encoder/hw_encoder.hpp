@@ -15,7 +15,7 @@
 
 namespace MyDrivers {
 
-class hw_encoder {
+class HW_Encoder {
 public:
     __IO int32_t delta_counter;     /* 编码器单位时间内的增量 */
     __IO int32_t last_counter;
@@ -28,7 +28,7 @@ private:
     Encoder_HandleTypeDef *Encoder_Handle;
 
 public:
-    hw_encoder() {}
+    HW_Encoder() {}
     constexpr static double resolution(uint8_t encoder_mode) {
         return line * reduction_ratio * encoder_mode;
     }
@@ -41,9 +41,9 @@ public:
     uint32_t getPeriod(void) {
         return (__HAL_TIM_GET_AUTORELOAD(Encoder_Handle) + 1);
     }
-    static void interrput(hw_encoder &encoder);
+    static void interrput(HW_Encoder &encoder);
 
-    virtual ~hw_encoder() {}
+    virtual ~HW_Encoder() {}
 };
 
 } /* namespace MyDrivers */

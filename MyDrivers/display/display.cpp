@@ -5,12 +5,12 @@
  *      Author: huang
  */
 
-#include "display/display.hpp"
+#include <display/Display.hpp>
 #include "display/inc/tft_lcd_font.h"
 
 namespace MyDrivers {
 
-display::display(tft_lcd* panelType) {
+Display::Display(TFT_Lcd* panelType) {
     // TODO Auto-generated constructor stub
     DrawProp.BackColor = lcd_color::WHITE;
     DrawProp.pFont     = &Font24;
@@ -20,12 +20,12 @@ display::display(tft_lcd* panelType) {
     tft_panel = panelType;
 }
 
-void display::init(void)
+void Display::init(void)
 {
     tft_panel->init();
 }
 
-void display::setCharSize(uint8_t size)
+void Display::setCharSize(uint8_t size)
 {
     charSize = size;
 }
@@ -34,7 +34,7 @@ void display::setCharSize(uint8_t size)
   * @brief  Sets the LCD text color.
   * @param  Color: Text color code RGB(5-6-5)
   */
-void display::setTextColor(lcd_color Color)
+void Display::setTextColor(lcd_color Color)
 {
     DrawProp.TextColor = Color;
 }
@@ -43,7 +43,7 @@ void display::setTextColor(lcd_color Color)
   * @brief  Clears the hole LCD.
   * @param  Color: Color of the background
   */
-void display::clear(lcd_color Color)
+void Display::clear(lcd_color Color)
 { 
     uint32_t counter = 0;
     
@@ -53,12 +53,12 @@ void display::clear(lcd_color Color)
     }
 }
 
-uint32_t display::getDisplayAddress()
+uint32_t Display::getDisplayAddress()
 {
     return tft_panel->getRamAddress();
 }
 
-void display::showChar(uint16_t x,uint16_t y,char ch)
+void Display::showChar(uint16_t x,uint16_t y,char ch)
 {
 	char temp, t1;
     uint16_t y0=y;
@@ -93,7 +93,7 @@ void display::showChar(uint16_t x,uint16_t y,char ch)
     }
 }
 
-void display::showString(uint16_t x,uint16_t y,char* str)
+void Display::showString(uint16_t x,uint16_t y,char* str)
 {
     uint8_t x0 = x;
     uint16_t width = tft_panel->getPixelWidth() + x;
@@ -113,7 +113,7 @@ void display::showString(uint16_t x,uint16_t y,char* str)
 }
 
 //m^n
-uint32_t display::power(uint8_t m,uint8_t n)
+uint32_t Display::power(uint8_t m,uint8_t n)
 {
     uint32_t result = 1;
     while(n--) result *= m;
@@ -121,7 +121,7 @@ uint32_t display::power(uint8_t m,uint8_t n)
 }
 
 
-display::~display() {
+Display::~Display() {
     // TODO Auto-generated destructor stub
 }
 

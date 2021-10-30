@@ -1,24 +1,24 @@
 /*
- * ft5316.cpp
+ * Ft5316.cpp
  *
  *  Created on: Aug 15, 2021
  *      Author: huang
  */
 
-#include "ft5316/ft5316.hpp"
+#include <ft5316/Ft5316.hpp>
 
 #define FT5316_I2C_ID     0x70
 
 const uint16_t FT5206_TPX_TBL[5]={FT_TP1_REG,FT_TP2_REG,FT_TP3_REG,FT_TP4_REG,FT_TP5_REG};
 
 
-ft5316::ft5316(I2C_HandleTypeDef *_touchPad_IIC_Handle) : 
+Ft5316::Ft5316(I2C_HandleTypeDef *_touchPad_IIC_Handle) :
 touchPad_IIC_Handle { _touchPad_IIC_Handle }{
     // TODO Auto-generated constructor stub
     ft5316_iic.init(touchPad_IIC_Handle, FT5316_I2C_ID);
 }
 
-bool ft5316::init(void)
+bool Ft5316::init(void)
 {
     uint8_t buffer[2]; 
     HAL_GPIO_WritePin(DCMI_RESET_GPIO_Port, DCMI_RESET_Pin, GPIO_PIN_RESET);//��λOV2640
@@ -43,7 +43,7 @@ bool ft5316::init(void)
 //mode:0,正常扫描.
 //返回值:当前触屏状态.
 //0,触屏无触摸;1,触屏有触摸
-void ft5316::readData(uint16_t &x, uint16_t &y)
+void Ft5316::readData(uint16_t &x, uint16_t &y)
 {
     uint8_t buffer[4];
     for( uint8_t i = 0; i < 1; i++ ){
@@ -53,7 +53,7 @@ void ft5316::readData(uint16_t &x, uint16_t &y)
     }
 }
 
-ft5316::~ft5316() {
+Ft5316::~Ft5316() {
     // TODO Auto-generated destructor stub
 }
 

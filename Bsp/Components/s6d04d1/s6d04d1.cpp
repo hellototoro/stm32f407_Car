@@ -5,9 +5,9 @@
  *      Author: huang
  */
 
-#include "s6d04d1/s6d04d1.hpp"
+#include <s6d04d1/S6d04d1.hpp>
 
-s6d04d1::s6d04d1() {
+S6d04d1::S6d04d1() {
     dir = MyDrivers::displayDir::horizontal;
     mode = MyDrivers::scanMode::R2L_D2U;
 }
@@ -17,7 +17,7 @@ s6d04d1::s6d04d1() {
   * @param  None
   * @retval None
   */
-void s6d04d1::displayOn(void)
+void S6d04d1::displayOn(void)
 {
     LCD_IO_WriteReg(DISPON);
 }
@@ -27,7 +27,7 @@ void s6d04d1::displayOn(void)
   * @param  None
   * @retval None
   */
-void s6d04d1::displayOff(void)
+void S6d04d1::displayOff(void)
 {
     LCD_IO_WriteReg(DISPOFF);
 }
@@ -37,7 +37,7 @@ void s6d04d1::displayOff(void)
   * @param  None
   * @retval None
   */
-void s6d04d1::prepareWrite(void)
+void S6d04d1::prepareWrite(void)
 {
     LCD_IO_WriteReg(RAMWR);
 }
@@ -47,7 +47,7 @@ void s6d04d1::prepareWrite(void)
   * @param  None
   * @retval The Lcd Pixel Width
   */
-uint16_t s6d04d1::getPixelWidth(void)
+uint16_t S6d04d1::getPixelWidth(void)
 {
  return width;
 }
@@ -57,12 +57,12 @@ uint16_t s6d04d1::getPixelWidth(void)
   * @param  None
   * @retval The Lcd Pixel Height
   */
-uint16_t s6d04d1::getPixelHeight(void)
+uint16_t S6d04d1::getPixelHeight(void)
 {
  return height;
 }
 
-uint32_t s6d04d1::getRamAddress(void)
+uint32_t S6d04d1::getRamAddress(void)
 {
     return readRamAddress();
 }
@@ -72,14 +72,14 @@ uint32_t s6d04d1::getRamAddress(void)
   * @param  None
   * @retval The s6d04d1 ID 
   */
-void s6d04d1::readID(void)
+void S6d04d1::readID(void)
 {
     LCD_IO_WriteReg(RDID2);
     LCD_IO_ReadRamData();//Dummy read 
     id = LCD_IO_ReadRamData();
 }
 
-uint16_t s6d04d1::getID(void)
+uint16_t S6d04d1::getID(void)
 {
     return id;
 }
@@ -90,7 +90,7 @@ uint16_t s6d04d1::getID(void)
   * @param  Ypos: specifies the Y position.
   * @retval None
   */
-void s6d04d1::setCursor(uint16_t Xpos,uint16_t Ypos)
+void S6d04d1::setCursor(uint16_t Xpos,uint16_t Ypos)
 {
     LCD_IO_WriteReg(CASET); 
     LCD_IO_WriteData(Xpos>>8);
@@ -107,7 +107,7 @@ void s6d04d1::setCursor(uint16_t Xpos,uint16_t Ypos)
   * @param  RGBCode: the RGB pixel color
   * @retval None
   */
-void s6d04d1::writePixel(uint16_t Xpos, uint16_t Ypos, uint16_t RGBCode)
+void S6d04d1::writePixel(uint16_t Xpos, uint16_t Ypos, uint16_t RGBCode)
 {
   /* Set Cursor */
   setCursor(Xpos, Ypos);
@@ -124,7 +124,7 @@ void s6d04d1::writePixel(uint16_t Xpos, uint16_t Ypos, uint16_t RGBCode)
   * @param  None
   * @retval The RGB pixel color
   */
-uint16_t s6d04d1::readPixel(uint16_t Xpos, uint16_t Ypos)
+uint16_t S6d04d1::readPixel(uint16_t Xpos, uint16_t Ypos)
 {
     /* Set Cursor */
     setCursor(Xpos, Ypos);
@@ -141,7 +141,7 @@ uint16_t s6d04d1::readPixel(uint16_t Xpos, uint16_t Ypos)
   * @param  LCDRegValue: Value to write to the selected register.
   * @retval None
   */
-void s6d04d1::writeReg(uint8_t LCDReg, uint16_t LCDRegValue)
+void S6d04d1::writeReg(uint8_t LCDReg, uint16_t LCDRegValue)
 {
   LCD_IO_WriteReg(LCDReg);
   
@@ -154,7 +154,7 @@ void s6d04d1::writeReg(uint8_t LCDReg, uint16_t LCDRegValue)
   * @param  LCDReg: address of the selected register.
   * @retval LCD Register Value.
   */
-uint16_t s6d04d1::readReg(uint8_t LCDReg)
+uint16_t S6d04d1::readReg(uint8_t LCDReg)
 { 
   /* Read 16-bit Reg */
   return (LCD_IO_ReadData(LCDReg));
@@ -168,7 +168,7 @@ uint16_t s6d04d1::readReg(uint8_t LCDReg)
   * @param  Width:  display window width.
   * @retval None
   */
-void s6d04d1::setDisplayWindow(uint16_t Xpos,uint16_t Ypos,uint16_t width,uint16_t height)
+void S6d04d1::setDisplayWindow(uint16_t Xpos,uint16_t Ypos,uint16_t width,uint16_t height)
 {
     uint16_t twidth,theight;
     twidth = (Xpos + width) > this->width ? this->width : (Xpos + width -1);
@@ -190,7 +190,7 @@ void s6d04d1::setDisplayWindow(uint16_t Xpos,uint16_t Ypos,uint16_t width,uint16
   * @param  scanMode:   扫描模式见此枚举变量.
   * @retval None
   */
-void s6d04d1::setScanMode(MyDrivers::scanMode mode)
+void S6d04d1::setScanMode(MyDrivers::scanMode mode)
 {
     uint16_t regValue = 0;
 
@@ -275,7 +275,7 @@ void s6d04d1::setScanMode(MyDrivers::scanMode mode)
   * @param  displayDir:   显示方向：横屏和竖屏
   * @retval None
   */
-void s6d04d1::setDisplayDir(MyDrivers::displayDir _displayDir)
+void S6d04d1::setDisplayDir(MyDrivers::displayDir _displayDir)
 {
     dir = _displayDir;
     switch (dir)
@@ -303,7 +303,7 @@ void s6d04d1::setDisplayDir(MyDrivers::displayDir _displayDir)
   * @param  Length:   specifies the Line length.  
   * @retval None
   */
-void s6d04d1::drawHLine(uint16_t RGBCode, uint16_t Xpos, uint16_t Ypos, uint16_t Length)
+void S6d04d1::drawHLine(uint16_t RGBCode, uint16_t Xpos, uint16_t Ypos, uint16_t Length)
 {
     uint16_t counter = 0;
 
@@ -328,7 +328,7 @@ void s6d04d1::drawHLine(uint16_t RGBCode, uint16_t Xpos, uint16_t Ypos, uint16_t
   * @param  Length:   specifies the Line length.  
   * @retval None
   */
-void s6d04d1::drawVLine(uint16_t RGBCode, uint16_t Xpos, uint16_t Ypos, uint16_t Length)
+void S6d04d1::drawVLine(uint16_t RGBCode, uint16_t Xpos, uint16_t Ypos, uint16_t Length)
 {
   uint16_t counter = 0;
 
@@ -358,7 +358,7 @@ void s6d04d1::drawVLine(uint16_t RGBCode, uint16_t Xpos, uint16_t Ypos, uint16_t
 //画线
 // startXpos, startYpos:起点坐标
 // endXpos, endYpos:终点坐标  
-void s6d04d1::drawLine(uint16_t RGBCode, uint16_t startXpos, uint16_t startYpos, uint16_t endXpos, uint16_t endYpos)
+void S6d04d1::drawLine(uint16_t RGBCode, uint16_t startXpos, uint16_t startYpos, uint16_t endXpos, uint16_t endYpos)
 {
     int xerr = 0, yerr = 0, distance; 
     int incx, incy; 
@@ -411,7 +411,7 @@ void s6d04d1::drawLine(uint16_t RGBCode, uint16_t startXpos, uint16_t startYpos,
   * @param  Ypos: Bmp Y position in the LCD    
   * @retval None
   */
-void s6d04d1::drawBitmap(uint16_t Xpos, uint16_t Ypos, uint8_t *pbmp)
+void S6d04d1::drawBitmap(uint16_t Xpos, uint16_t Ypos, uint8_t *pbmp)
 {
     uint32_t index = 0, size = 0;
     /* Read bitmap size */
@@ -450,7 +450,7 @@ void s6d04d1::drawBitmap(uint16_t Xpos, uint16_t Ypos, uint8_t *pbmp)
   * @param  Ysize: Image Y size in the LCD
   * @retval None
   */
-void s6d04d1::drawRGBImage(uint16_t Xpos, uint16_t Ypos, uint16_t Xsize, uint16_t Ysize, uint8_t *pdata)
+void S6d04d1::drawRGBImage(uint16_t Xpos, uint16_t Ypos, uint16_t Xsize, uint16_t Ysize, uint8_t *pdata)
 {
   uint32_t size = 0;
 
@@ -465,7 +465,7 @@ void s6d04d1::drawRGBImage(uint16_t Xpos, uint16_t Ypos, uint16_t Xsize, uint16_
   LCD_IO_WriteMultipleData((uint16_t*)pdata, size);
 }
 
-void s6d04d1::init(void)
+void S6d04d1::init(void)
 {
     LCD_Delay(100);
     readID();
@@ -663,7 +663,7 @@ void s6d04d1::init(void)
     prepareWrite();
 }
 
-s6d04d1::~s6d04d1() {
+S6d04d1::~S6d04d1() {
     // TODO Auto-generated destructor stub
 }
 

@@ -5,21 +5,20 @@
  *      Author: huang
  */
 
-#include "ultrasonic/ultrasonic.hpp"
-
+#include <ultrasonic/Ultrasonic.hpp>
 #include "board.h"
 
-ultrasonic::ultrasonic() {
+Ultrasonic::Ultrasonic() {
     // TODO Auto-generated constructor stub
 
 }
 
-void ultrasonic::trig(void)
+void Ultrasonic::trig(void)
 {
     send_trig();
 }
 
-ultrasonic::~ultrasonic() {
+Ultrasonic::~Ultrasonic() {
     // TODO Auto-generated destructor stub
 }
 
