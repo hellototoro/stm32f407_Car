@@ -1,4 +1,5 @@
 #include "PID/fire_pid.h"
+#include <math.h>
 
 /**
   * @brief  PID参数初始化
@@ -12,6 +13,13 @@ void PID_param_init(Pid *pid, double kp, double ki, double kd, double outMin, do
     pid->Kd = kd;
     pid->outMin = outMin;
     pid->outMax = outMax;
+}
+
+void setOutputLimits(Pid *pid, double Min, double Max)
+{
+    if(Min >= Max) return;
+    pid->outMin = Min;
+    pid->outMax = Max;
 }
 
 /**
@@ -51,25 +59,47 @@ void set_p_i_d(Pid *pid, double p, double i, double d)
     pid->Kd = d;    // 设置微分系数 D
 }
 
+void clear_pid_status(Pid *pid)
+{
+    //pid.target_val=10.0;
+    pid->output_val = 0.0;
+    pid->err = 0.0;
+    pid->err_last = 0.0;
+    pid->integral = 0.0;
+}
 /**
   * @brief  位置PID算法实现
   * @param  actual_val:实际值
-    *	@note 	无
+    *	@note  无
   * @retval 通过PID计算后的输出
   */
+#define LOC_DEAD_ZONE 50 /*位置环死区*/
+#define LOC_INTEGRAL_START_ERR 200 /*积分分离时对应的误差范围*/
+#define LOC_INTEGRAL_MAX_VAL 800   /*积分范围限定，防止积分饱和*/
 double location_pid_realize(Pid *pid, double actual_val)
 {
     /*计算目标值与实际值的误差*/
     pid->err = pid->target_val - actual_val;
   
     /* 设定闭环死区 */
-    if((pid->err >= -20) && (pid->err <= 20)) {
+    if(abs(pid->err) < LOC_DEAD_ZONE) {
         pid->err = 0;
         pid->integral = 0;
         pid->err_last = 0;
     }
     
-    pid->integral += pid->err;    // 误差累积
+    //pid->integral += pid->err;    // 误差累积
+    /*积分项，积分分离，偏差较大时去掉积分作用*/
+    if(abs(pid->err) < LOC_INTEGRAL_START_ERR)
+    {
+        pid->integral += pid->err;  
+        /*积分范围限定，防止积分饱和*/
+        if(pid->integral > LOC_INTEGRAL_MAX_VAL) {
+            pid->integral = LOC_INTEGRAL_MAX_VAL;
+        } else if(pid->integral < -LOC_INTEGRAL_MAX_VAL) {
+            pid->integral = -LOC_INTEGRAL_MAX_VAL;
+        }
+    }
 
     /*PID算法实现*/
     pid->output_val = pid->Kp * pid->err + 
@@ -97,7 +127,7 @@ double speed_pid_realize(Pid *pid, double actual_val)
     /*计算目标值与实际值的误差*/
     pid->err = pid->target_val-actual_val;
 
-    if((pid->err < 0.2f )&& (pid->err > -0.2f))
+    if(abs(pid->err) < 0.2f)
         pid->err = 0.0f;
 
     pid->integral += pid->err;    // 误差累积

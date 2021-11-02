@@ -39,9 +39,9 @@ void MyCar::init(void)
                      PWM_HANDLE(RIGHT), CHANNEL(RIGHT),
                      ENCODER_HANDLE(RIGHT));
     left_wheel.PID_Init(5.0, 2.0, 0.0,  //速度环pid
-                        0.0, 0.0, 0.0); //位置环pid
-    right_wheel.PID_Init(5.0, 0.0013, 0.0, //速度环pid
-                         0.0, 0.0, 0.0);//位置环pid
+                        0.158, 0.0, 0.0); //位置环pid
+    right_wheel.PID_Init(5.0, 2.0, 0.0, //速度环pid
+                         0.158, 0.0, 0.0);//位置环pid
     HAL_TIM_Base_Start_IT(encoder_timer);
 }
 
@@ -51,57 +51,42 @@ void MyCar::power_on(void)
     right_wheel.start();
 }
 
-void MyCar::move_front(double speed, double distance)
+void MyCar::moveToSpeed(double speed_l, double speed_r)
 {
-    if (distance > 0.1f) {
-        left_wheel.setLocation(distance);
-        right_wheel.setLocation(distance);
-    } else {
-        left_wheel.setSpeed(speed);
-        right_wheel.setSpeed(speed);
-    }
-    left_wheel.run_front();
-    right_wheel.run_front();
+    left_wheel.setSpeed(speed_l);
+    right_wheel.setSpeed(speed_r);
 }
 
-void MyCar::move_back(double speed, double distance)
+void MyCar::moveToDistance(double distance_l, double distance_r)
 {
-    if (distance > 0.f) {
-        left_wheel.setLocation(distance);
-        right_wheel.setLocation(distance);
-    } else {
-        left_wheel.setSpeed(speed);
-        right_wheel.setSpeed(speed);
-    }
-    left_wheel.run_back();
-    right_wheel.run_back();
+    left_wheel.setLocation(distance_l);
+
+    right_wheel.setLocation(distance_r);
 }
 
-void MyCar::turn_left(double speed, double angle)
+void MyCar::turn(double angle, double speed)
 {
     double distance = angle * ratio;
 
     left_wheel.setLocation(distance);
-    left_wheel.run_front();
 
-    right_wheel.setLocation(distance);
-    right_wheel.run_back();
-}
-
-void MyCar::turn_right(double speed, double angle)
-{
-    double distance = angle * ratio;
-
-    left_wheel.setLocation(distance);
-    left_wheel.run_back();
-
-    right_wheel.setLocation(distance);
-    right_wheel.run_front();
+    right_wheel.setLocation(distance*(-1));
 }
 
 void MyCar::stop(void)
 {
+    if (left_wheel.motor.runTypeIsSpeed()) {
+        left_wheel.setSpeed(0);
+    } else {
+        left_wheel.setLocation(0);
+    }
     left_wheel.stop();
+
+    if (right_wheel.motor.runTypeIsSpeed()) {
+        right_wheel.setSpeed(0);
+    } else {
+        right_wheel.setLocation(0);
+    }
     right_wheel.stop();
 }
 

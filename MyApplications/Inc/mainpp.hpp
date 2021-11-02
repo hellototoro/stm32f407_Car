@@ -8,9 +8,9 @@ extern "C" {
 #include "main.h"
 
 extern void setup(void);
-extern void loop(void);
 extern void TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim);
 extern void set_target_speed(Motor_WheelType wheel, double speed);
+extern void LEDTask(void);
 
 #ifdef __cplusplus
 }

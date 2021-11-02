@@ -23,6 +23,8 @@
 #include "PID/fire_pid.h"
 #include "cmsis_os.h"
 
+#define DEBUG_SPEED 0
+
 /* 外部变量声明 */
 extern MyCar car;
 extern osSemaphoreId SemUartReceivedHandle;
@@ -112,9 +114,17 @@ void analysis_rec_data(void)
                     //set_p_i_d(recv_data[CHX_INDEX_VAL],p_temp, i_temp, d_temp);    // 设置 P I D
                     
                     if (recv_data[CHX_INDEX_VAL] == CURVES_CH1) {
+                        #if DEBUG_SPEED
                         set_p_i_d(&car.left_wheel.motor.speed_pid , p_temp, i_temp, d_temp);
+                        #else
+                        set_p_i_d(&car.left_wheel.motor.location_pid , p_temp, i_temp, d_temp);
+                        #endif
                     } else if (recv_data[CHX_INDEX_VAL] == CURVES_CH2) {
+                        #if DEBUG_SPEED
                         set_p_i_d(&car.right_wheel.motor.speed_pid , p_temp, i_temp, d_temp);
+                        #else
+                        set_p_i_d(&car.right_wheel.motor.location_pid , p_temp, i_temp, d_temp);
+                        #endif
                     }
                 }
                 break;
@@ -124,23 +134,33 @@ void analysis_rec_data(void)
                     int actual_temp = COMPOUND_32BIT(&recv_data[13]);    // 得到数据
                     //set_pid_target(recv_data[CHX_INDEX_VAL],actual_temp);    // 设置目标值
                     if (recv_data[CHX_INDEX_VAL] == CURVES_CH1) {
+                        #if DEBUG_SPEED
                         set_pid_target(&car.left_wheel.motor.speed_pid, actual_temp);
+                        #else
+                        set_pid_target(&car.left_wheel.motor.location_pid, actual_temp);
+                        #endif
                     } else if (recv_data[CHX_INDEX_VAL] == CURVES_CH2) {
+                        #if DEBUG_SPEED
                         set_pid_target(&car.right_wheel.motor.speed_pid, actual_temp);
+                        #else
+                        set_pid_target(&car.right_wheel.motor.location_pid, actual_temp);
+                        #endif
                     }
                 }
                 break;
                 
                 case START_CMD:
                 {
-                    //Motor_move(FRONT);              // 启动电机
-                    car.move_front(80.f);
+                    #if DEBUG_SPEED
+                    car.moveToSpeed(80.f, 80.f);
+                    #else
+                    car.moveToDistance(1080,1080);
+                    #endif
                 }
                 break;
                 
                 case STOP_CMD:
                 {
-                    //Motor_move(STOP);              // 停止电机
                     car.stop();
                 }
                 break;
@@ -202,34 +222,4 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
         }
     }
 }
-
-
-
-/* 串口回调函数 */
-
-/* pid debug */
-/*void set_p_i_d(uint8_t ch,float p_temp, float i_temp, float d_temp)
-{
-    if (ch == CURVES_CH1)
-        Motor_PID_l.SetTunings(p_temp, i_temp, d_temp);
-    else
-        Motor_PID_r.SetTunings(p_temp, i_temp, d_temp);
-}
-
-void set_pid_target(uint8_t ch, float temp_val)
-{
-    if (ch == CURVES_CH1)
-        set_target_speed(wheel_left, temp_val);
-    else
-        set_target_speed(wheel_right, temp_val);
-}
-
-void set_period(uint8_t ch,uint32_t period)
-{
-    if (ch == CURVES_CH1)
-        Motor_PID_l.SetSampleTime(period);
-    else
-        Motor_PID_r.SetSampleTime(period);
-}*/
-
 /**********************************************************************************************/

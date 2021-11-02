@@ -22,10 +22,9 @@ public:
     void init(void);
     void power_on(void);
     void power_off(void);
-    void move_front(double speed, double distance = 0.f);
-    void move_back(double speed, double distance = 0.f);
-    void turn_left(double speed, double angle = 0.f);
-    void turn_right(double speed, double angle = 0.f);
+    void moveToSpeed(double speed_l, double speed_r);
+    void moveToDistance(double distance_l, double distance_r);
+    void turn(double angle, double speed = 80.f);
     void stop(void);
     void timeout_interrput(TIM_HandleTypeDef *htim);
     virtual ~MyCar();
@@ -35,6 +34,7 @@ private:
     constexpr static double ratio = (M_PI * radiusOfTwoWheel) / 180.f;
 
 private:
+    void setMoveDirection(MyWheel &wheel, double value);
 };
 
 #endif /* INC_MYCAR_HPP_ */

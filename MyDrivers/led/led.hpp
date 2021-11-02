@@ -12,20 +12,21 @@
 
 namespace MyDrivers {
 
-enum class led_number {
-    number1 = 1,
-    number2
-};
-
 class Led {
 public:
-    Led(int _number);
+    Led(int number);
     void on(void);
     void off(void);
     void toggle(void);
 private:
-    void switch_led(bool_switch _switch);
     int number;
+    enum led_number {
+        led1 = 1,
+        led2
+    };
+
+private:
+    void switch_led(bool_switch led_switch);
 };
 }
 

@@ -18,8 +18,8 @@ public:
 
     //add by HuangJian
     PID() {}
-    void init(double*, double*, double*,    // * constructor.  links the PID to the Input, Output, and 
-              double, double, double, int); //   Setpoint.  Initial tuning parameters are also set here
+    void init(double* Input, double* Output, double* Setpoint,              // * constructor.  links the PID to the Input, Output, and 
+              double Kp, double Ki, double Kd, int ControllerDirection);    //   Setpoint.  Initial tuning parameters are also set here
 
     //commonly used functions **************************************************************************
     PID(double*, double*, double*,          // * constructor.  links the PID to the Input, Output, and 

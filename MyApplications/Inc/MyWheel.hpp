@@ -12,6 +12,7 @@
 #include <math.h>
 #include <motor/Motor.hpp>
 
+#define DISTANCE_PID_DEBUG  1
 class MyWheel
 {
 public:
@@ -34,10 +35,10 @@ public:
         motor.locationPID_Init(l_kp, l_ki, l_kd);
     }
     void start(void) { motor.start(); }
-    void run_front(void) { motor.run(MyDrivers::Motor::plus); }
-    void run_back(void) { motor.run(MyDrivers::Motor::minus); }
     void stop(void) { motor.off(); }
     double getSpeed_RPM(void) { return motor.getRPM(); }
+    double getMileage(void) { return mileage; }
+    double getSumCounter(void) { return motor.encoder.sum_counter; }
     double getTargetValue(void) { return target_value; }
     constexpr static double ratio(uint8_t encoder_mode) { return (M_PI * diameter) / MyDrivers::HW_Encoder::resolution(encoder_mode); }
     void setSpeed(double speed) {
@@ -45,14 +46,19 @@ public:
         motor.setSpeed(speed);
     }
     void setLocation(double distance) {
+        #if DISTANCE_PID_DEBUG
+        target_value = distance;
+        motor.setLocation((int32_t)distance);
+        #else
         double counter = distance / ratio(4);
-        target_value = counter;
+        target_value = distance;
         motor.setLocation((int32_t)counter);
+        #endif
     }
     virtual ~MyWheel() {}
 
 private:
-    constexpr static double diameter = 0.048f;      //轮子直径，单位：m
+    constexpr static double diameter = 0.055f;      //轮子直径，单位：m
 };
 
 #endif /* INC_MYWHEEL_HPP_ */

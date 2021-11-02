@@ -24,6 +24,8 @@ extern double get_pid_target(Pid *pid);
 extern void set_p_i_d(Pid *pid, double p, double i, double d);
 extern double location_pid_realize(Pid *pid, double actual_val);
 extern double speed_pid_realize(Pid *pid, double actual_val);
+extern void setOutputLimits(Pid *pid, double Min, double Max);
+extern void clear_pid_status(Pid *pid);
 
 #ifdef __cplusplus
 }

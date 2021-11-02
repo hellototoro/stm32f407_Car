@@ -64,21 +64,10 @@ SRAM_HandleTypeDef hsram1;
 SRAM_HandleTypeDef hsram2;
 
 osThreadId defaultTaskHandle;
-osThreadId CarTaskHandle;
-uint32_t CarTaskBuffer[ 1024 ];
-osStaticThreadDef_t CarTaskControlBlock;
-osThreadId LEDTaskHandle;
-uint32_t LEDTaskBuffer[ 128 ];
-osStaticThreadDef_t LEDTaskControlBlock;
 osThreadId DisplayTaskHandle;
-uint32_t DisplayTaskBuffer[ 1024 ];
-osStaticThreadDef_t DisplayTaskControlBlock;
 osThreadId UartTaskHandle;
-uint32_t UartTaskBuffer[ 1024 ];
-osStaticThreadDef_t UartTaskControlBlock;
 osThreadId GUITaskHandle;
-uint32_t GUITaskBuffer[ 4096 ];
-osStaticThreadDef_t GUITaskControlBlock;
+osThreadId LoopTaskHandle;
 osSemaphoreId SemUartReceivedHandle;
 /* USER CODE BEGIN PV */
 //DCMI_HandleTypeDef *DCMI_Handle = &hdcmi;
@@ -110,11 +99,10 @@ static void MX_USART1_UART_Init(void);
 static void MX_TIM3_Init(void);
 static void MX_CRC_Init(void);
 void StartDefaultTask(void const * argument);
-extern void StartCarTask(void const * argument);
-extern void StartLEDTask(void const * argument);
 extern void StartDisplayTask(void const * argument);
 extern void StartUartTask(void const * argument);
 extern void StartGUITask(void const * argument);
+extern void StartLoopTask(void const * argument);
 
 /* USER CODE BEGIN PFP */
 
@@ -195,25 +183,21 @@ int main(void)
   osThreadDef(defaultTask, StartDefaultTask, osPriorityNormal, 0, 128);
   defaultTaskHandle = osThreadCreate(osThread(defaultTask), NULL);
 
-  /* definition and creation of CarTask */
-  osThreadStaticDef(CarTask, StartCarTask, osPriorityNormal, 0, 1024, CarTaskBuffer, &CarTaskControlBlock);
-  CarTaskHandle = osThreadCreate(osThread(CarTask), NULL);
-
-  /* definition and creation of LEDTask */
-  osThreadStaticDef(LEDTask, StartLEDTask, osPriorityLow, 0, 128, LEDTaskBuffer, &LEDTaskControlBlock);
-  LEDTaskHandle = osThreadCreate(osThread(LEDTask), NULL);
-
   /* definition and creation of DisplayTask */
-  osThreadStaticDef(DisplayTask, StartDisplayTask, osPriorityNormal, 0, 1024, DisplayTaskBuffer, &DisplayTaskControlBlock);
+  osThreadDef(DisplayTask, StartDisplayTask, osPriorityNormal, 0, 1024);
   DisplayTaskHandle = osThreadCreate(osThread(DisplayTask), NULL);
 
   /* definition and creation of UartTask */
-  osThreadStaticDef(UartTask, StartUartTask, osPriorityNormal, 0, 1024, UartTaskBuffer, &UartTaskControlBlock);
+  osThreadDef(UartTask, StartUartTask, osPriorityNormal, 0, 512);
   UartTaskHandle = osThreadCreate(osThread(UartTask), (void*) SemUartReceivedHandle);
 
   /* definition and creation of GUITask */
-  osThreadStaticDef(GUITask, StartGUITask, osPriorityNormal, 0, 4096, GUITaskBuffer, &GUITaskControlBlock);
+  osThreadDef(GUITask, StartGUITask, osPriorityNormal, 0, 2048);
   GUITaskHandle = osThreadCreate(osThread(GUITask), NULL);
+
+  /* definition and creation of LoopTask */
+  osThreadDef(LoopTask, StartLoopTask, osPriorityNormal, 0, 4096);
+  LoopTaskHandle = osThreadCreate(osThread(LoopTask), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -227,7 +211,6 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-    loop();
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -915,7 +898,7 @@ void StartDefaultTask(void const * argument)
   /* Infinite loop */
   for(;;)
   {
-    osDelay(1);
+    LEDTask();
   }
   /* USER CODE END 5 */
 }

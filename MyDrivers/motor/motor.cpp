@@ -10,6 +10,13 @@
 
 namespace MyDrivers {
 
+Motor::Motor() :
+direction { none }, location_pid_tag { false }, speed_pid_tag {false}
+{
+
+}
+
+
 void Motor::init(GPIO_TypeDef* motor_port_p, uint16_t motor_pin_p, 
                  GPIO_TypeDef* motor_port_n, uint16_t motor_pin_n, 
                  PWM_HandleTypeDef *PWM_Handle, uint32_t PWM_Channel, 
@@ -35,14 +42,31 @@ void Motor::start(void)
 void Motor::run(run_direction direction)
 {
     bool pin_state = (direction == plus) ? GPIO_PIN_SET : GPIO_PIN_RESET;
+    this->direction = direction;
     HAL_GPIO_WritePin(motor_port_p, motor_pin_p, static_cast<GPIO_PinState>(pin_state));
     HAL_GPIO_WritePin(motor_port_n, motor_pin_n, static_cast<GPIO_PinState>(!pin_state));
 }
 
+void Motor::setMoveDirection(double value)
+{
+    (value > 0) ? 
+    ((direction != plus)  ? run(plus)  : (void)value) :
+    ((direction != minus) ? run(minus) : (void)value);
+}
+
 void Motor::off(void)
 {
+    direction = none;
     HAL_GPIO_WritePin(motor_port_p, motor_pin_p, GPIO_PIN_RESET);
     HAL_GPIO_WritePin(motor_port_n, motor_pin_n, GPIO_PIN_RESET);
+}
+
+void Motor::resetPID(void)
+{
+    location_pid_tag = false;
+    speed_pid_tag = false;
+    clear_pid_status(&location_pid);
+    clear_pid_status(&speed_pid);
 }
 
 void Motor::setLocation(int32_t counter)
@@ -54,8 +78,9 @@ void Motor::setLocation(int32_t counter)
         location_pid.err_last = 0.0;
         location_pid.integral = 0.0;
     }
-    location_pid.target_val = counter + abs(encoder.sum_counter);
+    location_pid.target_val = counter + encoder.sum_counter;
     location_pid_tag = true;
+    setMoveDirection(counter);
 }
 
 void Motor::setSpeed(double speed)
@@ -69,6 +94,7 @@ void Motor::setSpeed(double speed)
     }
     speed_pid.target_val = speed;
     speed_pid_tag = true;
+    setMoveDirection(speed);
 }
 
 double Motor::getRPM(void)
@@ -112,21 +138,43 @@ void Motor::period_interrput(Motor &motor, uint16_t period, double &mileage, dou
     motor.encoder.last_counter = motor.encoder.sum_counter;
 
     if (motor.location_pid_tag) {
-        setDutyCycle(motor, location_pid_realize(&motor.location_pid, abs(motor.encoder.sum_counter)));
+        motor.setMoveDirection(motor.encoder.sum_counter);
+        setDutyCycle(motor, abs(location_pid_realize(&motor.location_pid, motor.encoder.sum_counter)));
     }
     if (motor.speed_pid_tag) {
-        setDutyCycle(motor, speed_pid_realize(&motor.speed_pid, abs(motor.real_time_rpm)));
+        //motor.setMoveDirection(motor.real_time_rpm);
+        setDutyCycle(motor, abs(speed_pid_realize(&motor.speed_pid, motor.real_time_rpm)));
     }
 }
 
 void Motor::locationPID_Init(double kp, double ki, double kd)
 {
-    PID_param_init(&location_pid, kp, ki, kd, 0, 255);
+    PID_param_init(&location_pid, kp, ki, kd, -255, 255);
 }
 
 void Motor::speedPID_Init(double kp, double ki, double kd)
 {
-    PID_param_init(&speed_pid, kp, ki, kd, 0, 255);
+    PID_param_init(&speed_pid, kp, ki, kd, -255, 255);
 }
+
+bool Motor::runTypeIsSpeed(void)
+{
+    return speed_pid_tag;
+}
+
+bool Motor::runTypeIsDistance(void)
+{
+    return location_pid_tag;
+}
+
+#if USE_ARDUINO_PID
+void Motor::PID_Init(void)
+{
+    pid.init(&Input, &Output, &Setpoint, Kp, Ki, Kd, DIRECT);
+    pid.SetMode(AUTOMATIC);
+    pid.SetOutputLimits(-255, 255);
+    pid.SetSampleTime(50);
+}
+#endif
 
 } /* namespace MyDrivers */

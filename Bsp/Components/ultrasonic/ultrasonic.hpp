@@ -10,16 +10,16 @@
 
 class Ultrasonic {
 public:
-	Ultrasonic();
-	void init();
-	int getDistance(void);
-	void ultrasonic_time_isr(void);
-	virtual ~Ultrasonic();
+    Ultrasonic();
+    void init();
+    int getDistance(void);
+    void ultrasonic_time_isr(void);
+    virtual ~Ultrasonic();
 
 private:
-	int distance;
+    int distance;
 private:
-	void trig(void);
+    void trig(void);
 };
 
 #endif /* COMPONENTS_ULTRASONIC_ULTRASONIC_HPP_ */
