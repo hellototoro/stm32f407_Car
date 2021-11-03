@@ -24,7 +24,7 @@ public:
 
 private:
     constexpr static double line = 3.f;
-    constexpr static double reduction_ratio = 90.f;
+    constexpr static double reduction_ratio = 85.f;
     Encoder_HandleTypeDef *Encoder_Handle;
 
 public:

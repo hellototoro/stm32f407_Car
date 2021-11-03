@@ -39,9 +39,9 @@ void MyCar::init(void)
                      PWM_HANDLE(RIGHT), CHANNEL(RIGHT),
                      ENCODER_HANDLE(RIGHT));
     left_wheel.PID_Init(5.0, 2.0, 0.0,  //速度环pid
-                        0.158, 0.0, 0.0); //位置环pid
+                        1.067, 0.0, 2.0); //位置环pid
     right_wheel.PID_Init(5.0, 2.0, 0.0, //速度环pid
-                         0.158, 0.0, 0.0);//位置环pid
+                         1.067, 0.0, 2.0);//位置环pid
     HAL_TIM_Base_Start_IT(encoder_timer);
 }
 
@@ -77,15 +77,19 @@ void MyCar::stop(void)
 {
     if (left_wheel.motor.runTypeIsSpeed()) {
         left_wheel.setSpeed(0);
+        left_wheel.motor.resetSpeed_PID();
     } else {
         left_wheel.setLocation(0);
+        left_wheel.motor.resetLocation_PID();
     }
     left_wheel.stop();
 
     if (right_wheel.motor.runTypeIsSpeed()) {
         right_wheel.setSpeed(0);
+        right_wheel.motor.resetSpeed_PID();
     } else {
         right_wheel.setLocation(0);
+        right_wheel.motor.resetLocation_PID();
     }
     right_wheel.stop();
 }

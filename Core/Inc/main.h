@@ -73,6 +73,8 @@ void Error_Handler(void);
 
 /* Private defines -----------------------------------------------------------*/
 #define ENCODER_TICK_FREQ_DEFAULT 50
+#define LEFT_MOTOR_N_Pin GPIO_PIN_7
+#define LEFT_MOTOR_N_GPIO_Port GPIOF
 #define LED1_Pin GPIO_PIN_9
 #define LED1_GPIO_Port GPIOF
 #define LED2_Pin GPIO_PIN_10
@@ -83,8 +85,6 @@ void Error_Handler(void);
 #define RIGHT_MOTOR_N_GPIO_Port GPIOC
 #define LEFT_MOTOR_P_Pin GPIO_PIN_2
 #define LEFT_MOTOR_P_GPIO_Port GPIOC
-#define LEFT_MOTOR_N_Pin GPIO_PIN_3
-#define LEFT_MOTOR_N_GPIO_Port GPIOC
 #define LEFT_ENCODER_A_Pin GPIO_PIN_0
 #define LEFT_ENCODER_A_GPIO_Port GPIOA
 #define LEFT_ENCODER_B_Pin GPIO_PIN_1

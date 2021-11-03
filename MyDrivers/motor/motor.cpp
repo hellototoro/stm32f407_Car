@@ -61,13 +61,18 @@ void Motor::off(void)
     HAL_GPIO_WritePin(motor_port_n, motor_pin_n, GPIO_PIN_RESET);
 }
 
-void Motor::resetPID(void)
+void Motor::resetLocation_PID(void)
 {
     location_pid_tag = false;
-    speed_pid_tag = false;
     clear_pid_status(&location_pid);
+}
+
+void Motor::resetSpeed_PID(void)
+{
+    speed_pid_tag = false;
     clear_pid_status(&speed_pid);
 }
+
 
 void Motor::setLocation(int32_t counter)
 {
@@ -78,9 +83,14 @@ void Motor::setLocation(int32_t counter)
         location_pid.err_last = 0.0;
         location_pid.integral = 0.0;
     }
-    location_pid.target_val = counter + encoder.sum_counter;
     location_pid_tag = true;
+    #if USE_ABSOLUTE_LOCATION
+    location_pid.target_val = counter;
+    setMoveDirection(location_pid.target_val - encoder.sum_counter);
+    #else
+    location_pid.target_val = counter + encoder.sum_counter;
     setMoveDirection(counter);
+    #endif
 }
 
 void Motor::setSpeed(double speed)
@@ -92,8 +102,8 @@ void Motor::setSpeed(double speed)
         speed_pid.err_last = 0.0;
         speed_pid.integral = 0.0;
     }
-    speed_pid.target_val = speed;
     speed_pid_tag = true;
+    speed_pid.target_val = speed;
     setMoveDirection(speed);
 }
 
@@ -126,24 +136,31 @@ void Motor::setDutyCycle(Motor &motor, uint16_t D)
 
 void Motor::period_interrput(Motor &motor, uint16_t period, double &mileage, double mileage_ratio)
 {
-    motor.encoder.sum_counter = motor.encoder.getEncoderCounter() + (motor.encoder.overflow * motor.encoder.getPeriod());
+    motor.encoder.sum_counter = motor.encoder.getEncoderCounter() + 
+                                (motor.encoder.overflow * motor.encoder.getPeriod());
 
     motor.encoder.delta_counter = motor.encoder.sum_counter - motor.encoder.last_counter;
 
     motor.real_time_rpm = motor.encoder.delta_counter * ratio(period);//(encoder.delta_counter * 1000 * 60.f) / (encoder.resolution(4) * (double)period);//转/分钟
 
-    //encoder.sum_counter += encoder.delta_counter;
     mileage += motor.encoder.delta_counter * mileage_ratio;
 
     motor.encoder.last_counter = motor.encoder.sum_counter;
 
+    pid_cal(motor);
+}
+
+void Motor::pid_cal(Motor &motor)
+{
     if (motor.location_pid_tag) {
-        motor.setMoveDirection(motor.encoder.sum_counter);
-        setDutyCycle(motor, abs(location_pid_realize(&motor.location_pid, motor.encoder.sum_counter)));
+        location_pid_realize(&motor.location_pid, motor.encoder.sum_counter);
+        motor.setMoveDirection(motor.location_pid.output_val);
+        setDutyCycle(motor, abs(motor.location_pid.output_val));
     }
     if (motor.speed_pid_tag) {
-        //motor.setMoveDirection(motor.real_time_rpm);
-        setDutyCycle(motor, abs(speed_pid_realize(&motor.speed_pid, motor.real_time_rpm)));
+        speed_pid_realize(&motor.speed_pid, motor.real_time_rpm);
+        //motor.setMoveDirection(motor.speed_pid.output_val);
+        setDutyCycle(motor, abs(motor.speed_pid.output_val));
     }
 }
 

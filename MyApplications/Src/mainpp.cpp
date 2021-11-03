@@ -45,12 +45,14 @@ void setup(void)
     //car.moveToDistance(1080,1080);
     //car.moveToSpeed(80.f, 80.f);
     //car.moveToDistance(1.f, 1.f);
-    car.turn(90);
+    //car.turn(90.f);
+    //car.moveToDistance(1.f,1.f);
+    car.turn(45.f);
 
     //debug
     set_computer_value(SEND_STOP_CMD, CURVES_CH1, NULL, 0);    // 同步上位机的启动按钮状态
     set_computer_value(SEND_STOP_CMD, CURVES_CH2, NULL, 0);    // 同步上位机的启动按钮状态
-    int32_t temp = (int32_t)1080;
+    int32_t temp = (int32_t)-1080;
     set_computer_value(SEND_TARGET_CMD, CURVES_CH1, &temp, 1);     // 给通道 1 发送目标值
     set_computer_value(SEND_TARGET_CMD, CURVES_CH2, &temp, 1);     // 给通道 1 发送目标值
     pid_tool_start_receive();

@@ -30,7 +30,7 @@ public:
     virtual ~MyCar();
 
 private:
-    constexpr static double radiusOfTwoWheel = 0.156f;//两轮中心距离
+    constexpr static double radiusOfTwoWheel = 0.055f;//两轮中心距离
     constexpr static double ratio = (M_PI * radiusOfTwoWheel) / 180.f;
 
 private:

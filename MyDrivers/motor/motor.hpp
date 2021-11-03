@@ -8,7 +8,8 @@
 #ifndef MOTOR_MOTOR_HPP_
 #define MOTOR_MOTOR_HPP_
 
-#define USE_ARDUINO_PID 0
+#define USE_ARDUINO_PID         0
+#define USE_ABSOLUTE_LOCATION   0
 
 #include <encoder/HW_Encoder.hpp>
 #include "main.h"
@@ -51,13 +52,15 @@ public:
     void run(run_direction direction);
     void setMoveDirection(double value);
     void off(void);
-    void resetPID(void);
+    void resetLocation_PID(void);
+    void resetSpeed_PID(void);
     void setLocation(int32_t counter);
     void setSpeed(double speed);
     double getRPM(void);
     bool runTypeIsSpeed(void);
     bool runTypeIsDistance(void);
     static void period_interrput(Motor &_motor, uint16_t period, double &mileage, double mileage_ratio);
+    static void pid_cal(Motor &motor);
     virtual ~Motor() {}
 
 private:

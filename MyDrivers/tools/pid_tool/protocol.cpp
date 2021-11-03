@@ -134,16 +134,22 @@ void analysis_rec_data(void)
                     int actual_temp = COMPOUND_32BIT(&recv_data[13]);    // 得到数据
                     //set_pid_target(recv_data[CHX_INDEX_VAL],actual_temp);    // 设置目标值
                     if (recv_data[CHX_INDEX_VAL] == CURVES_CH1) {
+                        car.left_wheel.target_value = actual_temp;
                         #if DEBUG_SPEED
-                        set_pid_target(&car.left_wheel.motor.speed_pid, actual_temp);
+                        //set_pid_target(&car.left_wheel.motor.speed_pid, actual_temp);
+                        car.left_wheel.motor.setSpeed(actual_temp);
                         #else
-                        set_pid_target(&car.left_wheel.motor.location_pid, actual_temp);
+                        //set_pid_target(&car.left_wheel.motor.location_pid, actual_temp);
+                        car.left_wheel.motor.setLocation(actual_temp);
                         #endif
                     } else if (recv_data[CHX_INDEX_VAL] == CURVES_CH2) {
+                        car.right_wheel.target_value = actual_temp;
                         #if DEBUG_SPEED
-                        set_pid_target(&car.right_wheel.motor.speed_pid, actual_temp);
+                        //set_pid_target(&car.right_wheel.motor.speed_pid, actual_temp);
+                        car.right_wheel.motor.setSpeed(actual_temp);
                         #else
-                        set_pid_target(&car.right_wheel.motor.location_pid, actual_temp);
+                        //set_pid_target(&car.right_wheel.motor.location_pid, actual_temp);
+                        car.right_wheel.motor.setLocation(actual_temp);
                         #endif
                     }
                 }
@@ -152,9 +158,19 @@ void analysis_rec_data(void)
                 case START_CMD:
                 {
                     #if DEBUG_SPEED
-                    car.moveToSpeed(80.f, 80.f);
+                    //car.moveToSpeed(80.f, 80.f);
+                    car.left_wheel.target_value = 80.f;
+                    car.left_wheel.motor.setSpeed(80.f);
+
+                    car.right_wheel.target_value = 80.f;
+                    car.right_wheel.motor.setSpeed(80.f);
                     #else
-                    car.moveToDistance(1080,1080);
+                    //car.moveToDistance(-1080,-1080);
+                    car.left_wheel.target_value = 1080;
+                    car.left_wheel.motor.setLocation(1080);
+
+                    car.right_wheel.target_value = 1080;
+                    car.right_wheel.motor.setLocation(1080);
                     #endif
                 }
                 break;

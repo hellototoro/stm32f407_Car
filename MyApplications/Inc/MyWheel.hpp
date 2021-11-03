@@ -12,11 +12,9 @@
 #include <math.h>
 #include <motor/Motor.hpp>
 
-#define DISTANCE_PID_DEBUG  1
 class MyWheel
 {
 public:
-    //double current_speed;       /* 当前轮子速度（线速度），单位：m/s */
     double target_value;
     double mileage;             /* 当前轮子总里程，单位：m */
     MyDrivers::Motor motor;
@@ -46,19 +44,14 @@ public:
         motor.setSpeed(speed);
     }
     void setLocation(double distance) {
-        #if DISTANCE_PID_DEBUG
-        target_value = distance;
-        motor.setLocation((int32_t)distance);
-        #else
         double counter = distance / ratio(4);
         target_value = distance;
         motor.setLocation((int32_t)counter);
-        #endif
     }
     virtual ~MyWheel() {}
 
 private:
-    constexpr static double diameter = 0.055f;      //轮子直径，单位：m
+    constexpr static double diameter = 0.063f;      //轮子直径，单位：m
 };
 
 #endif /* INC_MYWHEEL_HPP_ */

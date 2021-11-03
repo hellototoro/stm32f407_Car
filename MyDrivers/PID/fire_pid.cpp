@@ -62,7 +62,7 @@ void set_p_i_d(Pid *pid, double p, double i, double d)
 void clear_pid_status(Pid *pid)
 {
     //pid.target_val=10.0;
-    pid->output_val = 0.0;
+    //pid->output_val = 0.0;
     pid->err = 0.0;
     pid->err_last = 0.0;
     pid->integral = 0.0;
@@ -82,24 +82,24 @@ double location_pid_realize(Pid *pid, double actual_val)
     pid->err = pid->target_val - actual_val;
   
     /* 设定闭环死区 */
-    if(abs(pid->err) < LOC_DEAD_ZONE) {
+    /*if(abs(pid->err) < LOC_DEAD_ZONE) {
         pid->err = 0;
         pid->integral = 0;
         pid->err_last = 0;
-    }
+    }*/
     
-    //pid->integral += pid->err;    // 误差累积
-    /*积分项，积分分离，偏差较大时去掉积分作用*/
-    if(abs(pid->err) < LOC_INTEGRAL_START_ERR)
+    pid->integral += pid->err;    // 误差累积
+    //积分项，积分分离，偏差较大时去掉积分作用
+    /*if(abs(pid->err) < LOC_INTEGRAL_START_ERR)
     {
         pid->integral += pid->err;  
-        /*积分范围限定，防止积分饱和*/
+        //积分范围限定，防止积分饱和
         if(pid->integral > LOC_INTEGRAL_MAX_VAL) {
             pid->integral = LOC_INTEGRAL_MAX_VAL;
         } else if(pid->integral < -LOC_INTEGRAL_MAX_VAL) {
             pid->integral = -LOC_INTEGRAL_MAX_VAL;
         }
-    }
+    }*/
 
     /*PID算法实现*/
     pid->output_val = pid->Kp * pid->err + 
