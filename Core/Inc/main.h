@@ -110,12 +110,22 @@ void Error_Handler(void);
 #define SOFT_I2C_SCL_GPIO_Port GPIOD
 #define SOFT_I2C_SDA_Pin GPIO_PIN_7
 #define SOFT_I2C_SDA_GPIO_Port GPIOD
+#define TRACKING_LEFT_Pin GPIO_PIN_5
+#define TRACKING_LEFT_GPIO_Port GPIOB
+#define TRACKING_RIGHT_Pin GPIO_PIN_6
+#define TRACKING_RIGHT_GPIO_Port GPIOB
+#define TRACKING_CENTRE_Pin GPIO_PIN_7
+#define TRACKING_CENTRE_GPIO_Port GPIOB
+#define KEY1_Pin GPIO_PIN_8
+#define KEY1_GPIO_Port GPIOB
+#define KEY0_Pin GPIO_PIN_9
+#define KEY0_GPIO_Port GPIOB
 /* USER CODE BEGIN Private defines */
 //extern DCMI_HandleTypeDef *DCMI_Handle;
 extern SRAM_HandleTypeDef *SRAM_Handle;
 extern DMA_HandleTypeDef *SRAMToLCD_DMA_Handle;
 extern RTC_HandleTypeDef *RtcHandle;
-extern I2C_HandleTypeDef *I2C_Handle;
+//extern I2C_HandleTypeDef *I2C_Handle;
 extern TIM_HandleTypeDef *usDelay_timer_Handle;
 extern UART_HandleTypeDef *UartHandle;
 extern PWM_HandleTypeDef *LEFT_motor_pwm;

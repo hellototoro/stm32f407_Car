@@ -11,7 +11,9 @@
 namespace MyDrivers {
 
 Motor::Motor() :
-direction { none }, location_pid_tag { false }, speed_pid_tag {false}
+direction { none }, location_pid_tag { false }, speed_pid_tag {false}, maxSpeed_tag { false }, 
+time_counter { 0 }
+
 {
 
 }
@@ -141,7 +143,7 @@ void Motor::period_interrput(Motor &motor, uint16_t period, double &mileage, dou
 
     motor.encoder.delta_counter = motor.encoder.sum_counter - motor.encoder.last_counter;
 
-    motor.real_time_rpm = motor.encoder.delta_counter * ratio(period);//(encoder.delta_counter * 1000 * 60.f) / (encoder.resolution(4) * (double)period);//转/分钟
+    motor.real_time_rpm = motor.encoder.delta_counter * rpm_ratio(period);//(encoder.delta_counter * 1000 * 60.f) / (encoder.resolution(4) * (double)period);//转/分钟
 
     mileage += motor.encoder.delta_counter * mileage_ratio;
 
@@ -161,6 +163,18 @@ void Motor::pid_cal(Motor &motor)
         speed_pid_realize(&motor.speed_pid, motor.real_time_rpm);
         //motor.setMoveDirection(motor.speed_pid.output_val);
         setDutyCycle(motor, abs(motor.speed_pid.output_val));
+    }
+    monitorMaxSpeed(motor);
+}
+
+void Motor::monitorMaxSpeed(Motor &motor)
+{
+    if (motor.pwm_resolution ==static_cast<uint16_t>(abs(motor.speed_pid.output_val)) ) {
+        if ( ++motor.time_counter > 2 ) {
+            motor.maxSpeed_tag = true;
+        }
+    } else {
+        motor.time_counter = 0;
     }
 }
 
@@ -182,6 +196,11 @@ bool Motor::runTypeIsSpeed(void)
 bool Motor::runTypeIsDistance(void)
 {
     return location_pid_tag;
+}
+
+bool Motor::isMaxSpeed(void)
+{
+    return maxSpeed_tag;
 }
 
 #if USE_ARDUINO_PID

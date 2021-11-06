@@ -12,6 +12,8 @@
 #include "MyWheel.hpp"
 #include <math.h>
 
+#define R               0.3f
+
 class MyCar {
 public:
     MyWheel left_wheel;
@@ -26,12 +28,15 @@ public:
     void moveToDistance(double distance_l, double distance_r);
     void turn(double angle, double speed = 80.f);
     void stop(void);
+    void cmd_vel(double external);
     void timeout_interrput(TIM_HandleTypeDef *htim);
     virtual ~MyCar();
 
 private:
     constexpr static double radiusOfTwoWheel = 0.055f;//两轮中心距离
     constexpr static double ratio = (M_PI * radiusOfTwoWheel) / 180.f;
+    constexpr static double r_inner = R - radiusOfTwoWheel;
+    constexpr static double r_external = R + radiusOfTwoWheel;
 
 private:
     void setMoveDirection(MyWheel &wheel, double value);

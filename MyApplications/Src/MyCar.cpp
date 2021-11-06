@@ -22,6 +22,7 @@ using namespace MyDrivers;
 #define ENCODER_HANDLE(dir)     dir##_encoder
 
 /* 外部变量声明 */
+extern MyCar car;
 
 MyCar::MyCar() {
     // TODO Auto-generated constructor stub
@@ -104,6 +105,21 @@ void MyCar::timeout_interrput(TIM_HandleTypeDef *htim)
     } else if (htim == ENCODER_HANDLE(RIGHT)) {
         HW_Encoder::interrput(right_wheel.motor.encoder);
     }
+}
+
+void MyCar::cmd_vel(double external)
+{
+    double speed_r = external;
+    double speed_l = (external / r_external) * r_inner;
+    moveToSpeed(MyWheel::speed2Rpm(speed_l), MyWheel::speed2Rpm(speed_r));
+}
+
+extern "C" {
+void PID_ComputeTimerCallback(void const * argument)
+{
+    Motor::pid_cal(car.left_wheel.motor);
+    Motor::pid_cal(car.right_wheel.motor);
+}
 }
 
 MyCar::~MyCar() {

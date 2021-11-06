@@ -10,6 +10,7 @@
 
 #define USE_ARDUINO_PID         0
 #define USE_ABSOLUTE_LOCATION   0
+#define RPM_TIME_USE_S          0
 
 #include <encoder/HW_Encoder.hpp>
 #include "main.h"
@@ -59,15 +60,21 @@ public:
     double getRPM(void);
     bool runTypeIsSpeed(void);
     bool runTypeIsDistance(void);
+    static void monitorMaxSpeed(Motor &motor);
+    bool isMaxSpeed(void);
     static void period_interrput(Motor &_motor, uint16_t period, double &mileage, double mileage_ratio);
     static void pid_cal(Motor &motor);
     virtual ~Motor() {}
 
 private:
     double real_time_rpm;               /* 当前轮子转速：单位：转/秒 */
-    constexpr static uint8_t pwm_resolution = 255;
-    constexpr static double ratio(uint16_t period) {
-        return (1000 * 60.f) / (HW_Encoder::resolution(4) * period);
+    constexpr static uint16_t pwm_resolution = 255;
+    constexpr static double rpm_ratio(uint16_t period) {
+        #if RPM_TIME_USE_S
+        return (1000.f / (HW_Encoder::resolution(4) * (double)period));
+        #else
+        return (1000 * 60.f) / (HW_Encoder::resolution(4) * (double)period);
+        #endif
     }
 
     GPIO_TypeDef *motor_port_p, *motor_port_n;
@@ -78,6 +85,8 @@ private:
     run_direction direction;
     bool location_pid_tag;
     bool speed_pid_tag;
+    bool maxSpeed_tag;
+    uint16_t time_counter;
 private:
     static void setDutyCycle(Motor &motor, uint16_t D);
 

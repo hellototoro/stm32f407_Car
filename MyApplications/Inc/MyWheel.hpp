@@ -35,10 +35,14 @@ public:
     void start(void) { motor.start(); }
     void stop(void) { motor.off(); }
     double getSpeed_RPM(void) { return motor.getRPM(); }
+    
+    double getSpeed(void) { return motor.getRPM() * rpm2SpeedRatio; }
     double getMileage(void) { return mileage; }
     double getSumCounter(void) { return motor.encoder.sum_counter; }
     double getTargetValue(void) { return target_value; }
     constexpr static double ratio(uint8_t encoder_mode) { return (M_PI * diameter) / MyDrivers::HW_Encoder::resolution(encoder_mode); }
+    static double rpm2Speed(double rpm) { return rpm * rpm2SpeedRatio; }
+    static double speed2Rpm(double speed) { return speed / rpm2SpeedRatio; }
     void setSpeed(double speed) {
         target_value = speed;
         motor.setSpeed(speed);
@@ -52,6 +56,12 @@ public:
 
 private:
     constexpr static double diameter = 0.063f;      //轮子直径，单位：m
+    #if RPM_TIME_USE_S
+    constexpr static double rpm2SpeedRatio = M_PI * diameter;
+    #else
+    constexpr static double rpm2SpeedRatio = (M_PI * diameter)/60.F;
+    #endif
+
 };
 
 #endif /* INC_MYWHEEL_HPP_ */

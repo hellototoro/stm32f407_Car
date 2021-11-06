@@ -23,7 +23,7 @@
 #include "PID/fire_pid.h"
 #include "cmsis_os.h"
 
-#define DEBUG_SPEED 0
+#define DEBUG_SPEED 1
 
 /* 外部变量声明 */
 extern MyCar car;
@@ -137,7 +137,7 @@ void analysis_rec_data(void)
                         car.left_wheel.target_value = actual_temp;
                         #if DEBUG_SPEED
                         //set_pid_target(&car.left_wheel.motor.speed_pid, actual_temp);
-                        car.left_wheel.motor.setSpeed(actual_temp);
+                        car.left_wheel.motor.setSpeed(car.left_wheel.target_value);
                         #else
                         //set_pid_target(&car.left_wheel.motor.location_pid, actual_temp);
                         car.left_wheel.motor.setLocation(actual_temp);
@@ -146,7 +146,7 @@ void analysis_rec_data(void)
                         car.right_wheel.target_value = actual_temp;
                         #if DEBUG_SPEED
                         //set_pid_target(&car.right_wheel.motor.speed_pid, actual_temp);
-                        car.right_wheel.motor.setSpeed(actual_temp);
+                        car.right_wheel.motor.setSpeed(car.right_wheel.target_value);
                         #else
                         //set_pid_target(&car.right_wheel.motor.location_pid, actual_temp);
                         car.right_wheel.motor.setLocation(actual_temp);
@@ -160,10 +160,10 @@ void analysis_rec_data(void)
                     #if DEBUG_SPEED
                     //car.moveToSpeed(80.f, 80.f);
                     car.left_wheel.target_value = 80.f;
-                    car.left_wheel.motor.setSpeed(80.f);
+                    car.left_wheel.motor.setSpeed(car.left_wheel.target_value);
 
                     car.right_wheel.target_value = 80.f;
-                    car.right_wheel.motor.setSpeed(80.f);
+                    car.right_wheel.motor.setSpeed(car.right_wheel.target_value);
                     #else
                     //car.moveToDistance(-1080,-1080);
                     car.left_wheel.target_value = 1080;

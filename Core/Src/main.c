@@ -20,7 +20,6 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "cmsis_os.h"
-#include "app_touchgfx.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -43,10 +42,6 @@
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
-CRC_HandleTypeDef hcrc;
-
-I2C_HandleTypeDef hi2c1;
-
 RTC_HandleTypeDef hrtc;
 
 TIM_HandleTypeDef htim3;
@@ -66,13 +61,14 @@ SRAM_HandleTypeDef hsram2;
 osThreadId defaultTaskHandle;
 osThreadId DisplayTaskHandle;
 osThreadId UartTaskHandle;
-osThreadId GUITaskHandle;
 osThreadId LoopTaskHandle;
+osThreadId KeyTaskHandle;
+osThreadId CarTaskHandle;
 osSemaphoreId SemUartReceivedHandle;
 /* USER CODE BEGIN PV */
 //DCMI_HandleTypeDef *DCMI_Handle = &hdcmi;
 RTC_HandleTypeDef *RtcHandle = &hrtc;
-I2C_HandleTypeDef *I2C_Handle = &hi2c1;
+//I2C_HandleTypeDef *I2C_Handle = &hi2c1;
 TIM_HandleTypeDef *usDelay_timer_Handle = &htim7;
 UART_HandleTypeDef *UartHandle = &huart1;
 
@@ -91,18 +87,17 @@ static void MX_TIM5_Init(void);
 static void MX_FSMC_Init(void);
 static void MX_TIM9_Init(void);
 static void MX_DMA_Init(void);
-static void MX_I2C1_Init(void);
 static void MX_TIM7_Init(void);
 static void MX_RTC_Init(void);
 static void MX_TIM6_Init(void);
 static void MX_USART1_UART_Init(void);
 static void MX_TIM3_Init(void);
-static void MX_CRC_Init(void);
 void StartDefaultTask(void const * argument);
 extern void StartDisplayTask(void const * argument);
 extern void StartUartTask(void const * argument);
-extern void StartGUITask(void const * argument);
 extern void StartLoopTask(void const * argument);
+extern void StartKeyTask(void const * argument);
+extern void StartCarTask(void const * argument);
 
 /* USER CODE BEGIN PFP */
 
@@ -145,14 +140,11 @@ int main(void)
   MX_FSMC_Init();
   MX_TIM9_Init();
   MX_DMA_Init();
-  MX_I2C1_Init();
   MX_TIM7_Init();
   MX_RTC_Init();
   MX_TIM6_Init();
   MX_USART1_UART_Init();
   MX_TIM3_Init();
-  MX_CRC_Init();
-  //MX_TouchGFX_Init();
   /* USER CODE BEGIN 2 */
   setup();
   /* USER CODE END 2 */
@@ -191,13 +183,17 @@ int main(void)
   osThreadDef(UartTask, StartUartTask, osPriorityNormal, 0, 512);
   UartTaskHandle = osThreadCreate(osThread(UartTask), (void*) SemUartReceivedHandle);
 
-  /* definition and creation of GUITask */
-  osThreadDef(GUITask, StartGUITask, osPriorityNormal, 0, 2048);
-  GUITaskHandle = osThreadCreate(osThread(GUITask), NULL);
-
   /* definition and creation of LoopTask */
   osThreadDef(LoopTask, StartLoopTask, osPriorityNormal, 0, 4096);
   LoopTaskHandle = osThreadCreate(osThread(LoopTask), NULL);
+
+  /* definition and creation of KeyTask */
+  osThreadDef(KeyTask, StartKeyTask, osPriorityNormal, 0, 128);
+  KeyTaskHandle = osThreadCreate(osThread(KeyTask), NULL);
+
+  /* definition and creation of CarTask */
+  osThreadDef(CarTask, StartCarTask, osPriorityNormal, 0, 1024);
+  CarTaskHandle = osThreadCreate(osThread(CarTask), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -260,66 +256,6 @@ void SystemClock_Config(void)
   {
     Error_Handler();
   }
-}
-
-/**
-  * @brief CRC Initialization Function
-  * @param None
-  * @retval None
-  */
-static void MX_CRC_Init(void)
-{
-
-  /* USER CODE BEGIN CRC_Init 0 */
-
-  /* USER CODE END CRC_Init 0 */
-
-  /* USER CODE BEGIN CRC_Init 1 */
-
-  /* USER CODE END CRC_Init 1 */
-  hcrc.Instance = CRC;
-  if (HAL_CRC_Init(&hcrc) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN CRC_Init 2 */
-
-  /* USER CODE END CRC_Init 2 */
-
-}
-
-/**
-  * @brief I2C1 Initialization Function
-  * @param None
-  * @retval None
-  */
-static void MX_I2C1_Init(void)
-{
-
-  /* USER CODE BEGIN I2C1_Init 0 */
-
-  /* USER CODE END I2C1_Init 0 */
-
-  /* USER CODE BEGIN I2C1_Init 1 */
-
-  /* USER CODE END I2C1_Init 1 */
-  hi2c1.Instance = I2C1;
-  hi2c1.Init.ClockSpeed = 100000;
-  hi2c1.Init.DutyCycle = I2C_DUTYCYCLE_2;
-  hi2c1.Init.OwnAddress1 = 0;
-  hi2c1.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
-  hi2c1.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
-  hi2c1.Init.OwnAddress2 = 0;
-  hi2c1.Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;
-  hi2c1.Init.NoStretchMode = I2C_NOSTRETCH_DISABLE;
-  if (HAL_I2C_Init(&hi2c1) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN I2C1_Init 2 */
-
-  /* USER CODE END I2C1_Init 2 */
-
 }
 
 /**
@@ -784,6 +720,24 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
   HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : TRACKING_LEFT_Pin TRACKING_RIGHT_Pin */
+  GPIO_InitStruct.Pin = TRACKING_LEFT_Pin|TRACKING_RIGHT_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : TRACKING_CENTRE_Pin */
+  GPIO_InitStruct.Pin = TRACKING_CENTRE_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(TRACKING_CENTRE_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : KEY1_Pin KEY0_Pin */
+  GPIO_InitStruct.Pin = KEY1_Pin|KEY0_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
   /* EXTI interrupt init*/
   HAL_NVIC_SetPriority(EXTI1_IRQn, 5, 0);
