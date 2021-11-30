@@ -38,7 +38,8 @@ TrackingModeDir TrackingMode::direction(void)
 
 bool TrackingMode::isTracking(void)
 {
-
+    bool ret = true;
+    return ret;
 }
 
 TrackingMode::~TrackingMode() {
